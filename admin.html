@@ -710,8 +710,8 @@ input,textarea,select{font-size:16px !important;}
 'use strict';
 
 /* ── CONFIG ── */
-var OWNER = 'st-117te';
-var REPO  = 'st-117te.github.io';
+var OWNER = 'st117te';
+var REPO  = 'st117te.github.io';
 var BRANCH = 'main';
 var PASSWORD = 'Tetova357357';
 
@@ -748,11 +748,22 @@ if(sessionStorage.getItem('st117_auth')==='1') unlock();
 var _lb=document.getElementById('loginBtn'); if(_lb) _lb.addEventListener('click', tryLogin);
 var _pi=document.getElementById('pwInput'); if(_pi) _pi.addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
 function tryLogin(){
-  var pw = document.getElementById('pwInput').value;
-  if(pw === PASSWORD){ sessionStorage.setItem('st117_auth','1'); unlock(); }
-  else{ document.getElementById('loginErr').textContent='Incorrect password.'; document.getElementById('pwInput').value=''; document.getElementById('pwInput').focus(); }
+  var pwEl=document.getElementById('pwInput');
+  var pw=pwEl?pwEl.value:'';
+  if(pw===PASSWORD){ sessionStorage.setItem('st117_auth','1'); unlock(); }
+  else{
+    var errEl=document.getElementById('loginErr');
+    if(errEl)errEl.textContent='Incorrect password.';
+    if(pwEl){pwEl.value='';pwEl.focus();}
+  }
 }
-function unlock(){ document.getElementById('loginScreen').classList.add('gone'); document.getElementById('app').classList.add('on'); initApp(); }
+function unlock(){
+  var ls=document.getElementById('loginScreen');
+  var ap=document.getElementById('app');
+  if(ls)ls.classList.add('gone');
+  if(ap)ap.classList.add('on');
+  initApp();
+}
 var _lo=document.getElementById('logoutBtn'); if(_lo) _lo.addEventListener('click', function(){ sessionStorage.removeItem('st117_auth'); location.reload(); });
 
 /* ── PANELS ── */
@@ -826,7 +837,7 @@ if(ghToken){
   if(_gti) _gti.value=ghToken;
   /* updateTokenStatus called in initApp after app is visible */
 }
-var _stb=document.getElementById('saveTokenBtn'); if(_stb) _stb.addEventListener('click', function(){'use strict';
+var _stb=document.getElementById('saveTokenBtn'); if(_stb) _stb.addEventListener('click', function(){
   var v = document.getElementById('ghTokenInput').value.trim();
   if(!v){ showStatus('Token cannot be empty','err'); return; }
   ghToken = v; localStorage.setItem('st117_token', v); updateTokenStatus(); showStatus('✓ Token saved','ok');
@@ -862,8 +873,8 @@ function loadData(){
     if(!f) return {list:[],sha:null}; /* 404 — file doesn't exist yet */
     try{
       var raw=f.content.replace(/[\r\n\s]/g,'');
-      var list=JSON.parse(atob(raw));
-      if(!Array.isArray(list)) list=[];
+      var parsed=JSON.parse(atob(raw));
+      var list=Array.isArray(parsed)?parsed:[];
       return {list:list, sha:f.sha};
     }catch(e){
       console.warn('[ST117] artworks.json parse error',e);
@@ -955,12 +966,15 @@ function loadPreview(f){
 }
 function resetForm(){
   pendingFile=null;
-  document.getElementById('dropPrev').style.display='none'; document.getElementById('dropFname').style.display='none';
-  document.getElementById('dropIcon').style.display='block'; document.getElementById('dropMain').style.display='block'; document.getElementById('dropHint').style.display='block';
+  function sd(id,v){var el=document.getElementById(id);if(el)el.style.display=v;}
+  function sv(id,v){var el=document.getElementById(id);if(el)el.value=v;}
+  sd('dropPrev','none');sd('dropFname','none');
+  sd('dropIcon','block');sd('dropMain','block');sd('dropHint','block');
   if(fi) fi.value='';
-  ['fTitle','fDesc','fSize','fYear','fPrice'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('fType').value=''; document.getElementById('fSubcat').value='';
-  document.getElementById('fFeatured').checked=false; document.getElementById('subcatWrap').style.display='none';
+  ['fTitle','fDesc','fSize','fYear','fPrice'].forEach(function(id){sv(id,'');});
+  sv('fType','');sv('fSubcat','');
+  var ff=document.getElementById('fFeatured');if(ff)ff.checked=false;
+  sd('subcatWrap','none');
   var q=document.getElementById('fQuality');if(q)q.value='high';
 }
 
@@ -1090,7 +1104,7 @@ function saveEditedWork(id, title){
   var btn=document.getElementById('publishBtn');
   if(btn){btn.disabled=true; btn.textContent='Saving…';}
   var oldArtwork=(window._aw||[]).find(function(x){return x.id===id;});
-  if(!oldArtwork){showStatus('Artwork not found','err');btn.disabled=false;btn.textContent='Save Changes →';return;}
+  if(!oldArtwork){showStatus('Artwork not found','err');if(btn){btn.disabled=false;btn.textContent='Save Changes →';}return;}
 
   var doSave=function(newImgPath){
     showStatus('Saving metadata…','loading');

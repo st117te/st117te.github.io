@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ST117 — Admin Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;700&family=Inter:wght@900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#08080a;--bg2:#0d0d10;--bg3:#131316;--bg4:#1c1c20;
+  --ink:#f8f6f2;--ink-mid:#a19d96;--ink-soft:#706d68;
+  --red:#c8102e;--red-h:#e5142e;--red-a:rgba(200,16,46,.12);
+  --green:#22c55e;--green-a:rgba(34,197,94,.08);
+  --glass:rgba(14,14,17,.88);--glass-bdr:rgba(255,255,255,.08);--glass-top:rgba(255,255,255,.06);
+  --blur:blur(32px) saturate(160%);
+  --ease:cubic-bezier(0.19,1,0.22,1);--rad:14px;--rad-btn:8px;
+}
+html{height:100%;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
+.bf{font-family:'Inter',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-.05em;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
+
+/* ── LOGIN ── */
+#loginScreen{position:fixed;inset:0;z-index:9000;background:var(–bg);
+display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;padding:2rem;}
+#loginScreen.gone{display:none;}
+.lg-brand .name{font-size:3.8rem;letter-spacing:-.05em;line-height:.85;color:var(–ink);}
+.lg-brand .name .num{color:var(–red);font-style:italic;}
+.lg-brand .sub{display:block;margin-top:.9rem;font-size:.6rem;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(–ink-soft);}
+.lg-card{width:100%;max-width:400px;background:var(–bg2);border:1px solid var(–glass-bdr);
+border-radius:var(–rad);padding:2.5rem;box-shadow:0 48px 96px rgba(0,0,0,.6);}
+.lg-card h2{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:1.5rem;margin-bottom:.3rem;}
+.lg-sub{font-size:.8rem;color:var(–ink-soft);margin-bottom:1.8rem;line-height:1.6;}
+.lg-field{margin-bottom:1.3rem;}
+.lg-field label{display:block;font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(–ink-soft);margin-bottom:.55rem;}
+.lg-field input{width:100%;background:var(–bg3);border:1px solid var(–glass-bdr);border-radius:var(–rad-btn);
+padding:.85rem 1rem;font-family:‘DM Sans’,sans-serif;font-size:.95rem;color:var(–ink);outline:none;transition:border-color .22s;}
+.lg-field input:focus{border-color:var(–red);}
+.lg-err{font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(–red);min-height:1rem;margin-bottom:.7rem;}
+.btn-login{width:100%;padding:1rem;background:var(–ink);color:var(–bg);
+font-family:‘DM Sans’,sans-serif;font-size:.66rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+border:none;border-radius:var(–rad-btn);cursor:pointer;transition:background .28s var(–ease),transform .18s;}
+.btn-login:hover{background:var(–red);color:#fff;transform:translateY(-2px);}
+.btn-login:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh;}
+#app.on{display:flex;flex-direction:column;}
+
+/* TOPBAR */
+.topbar{height:58px;padding:0 1.8rem;flex-shrink:0;display:flex;align-items:center;
+justify-content:space-between;border-bottom:1px solid var(–glass-bdr);
+background:var(–bg);position:sticky;top:0;z-index:300;}
+.tb-logo{font-size:1.05rem;letter-spacing:-.05em;color:var(–ink);}
+.tb-logo .num{color:var(–red);font-style:italic;}
+.tb-logo .sep,.tb-logo .adm{color:var(–ink-soft);font-weight:400;font-family:‘DM Sans’,sans-serif;letter-spacing:.06em;}
+.tb-logo .sep{margin:0 .35rem;}
+.tb-logo .adm{font-size:.82rem;}
+.tb-right{display:flex;align-items:center;gap:.7rem;}
+.tb-link{display:flex;align-items:center;gap:.35rem;font-size:.6rem;font-weight:700;
+letter-spacing:.16em;text-transform:uppercase;color:var(–ink-soft);text-decoration:none;
+padding:.45rem .9rem;border:1px solid var(–glass-bdr);border-radius:var(–rad-btn);transition:color .22s,border-color .22s;}
+.tb-link:hover{color:var(–ink);border-color:rgba(255,255,255,.14);}
+.tb-out{background:none;border:1px solid var(–glass-bdr);color:var(–ink-soft);
+font-family:‘DM Sans’,sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+padding:.45rem .9rem;border-radius:var(–rad-btn);cursor:pointer;transition:border-color .22s,color .22s;}
+.tb-out:hover{border-color:var(–red);color:var(–red);}
+.burger{display:none;background:none;border:none;cursor:pointer;color:var(–ink-soft);padding:.35rem;
+-webkit-tap-highlight-color:transparent;}
+
+/* BODY */
+.app-body{display:flex;flex:1;overflow:hidden;height:calc(100vh - 58px);}
+
+/* SIDEBAR */
+.sidebar{width:252px;flex-shrink:0;background:var(–bg2);border-right:1px solid var(–glass-bdr);
+display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s var(–ease);}
+.sb-brand{padding:1.8rem 1.4rem 1.3rem;border-bottom:1px solid var(–glass-bdr);}
+.sb-name{font-size:2rem;letter-spacing:-.05em;line-height:.85;margin-bottom:.4rem;}
+.sb-name .num{color:var(–red);font-style:italic;}
+.sb-tag{font-size:.54rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(–ink-soft);line-height:1.7;}
+.sb-sec{padding:1.1rem 1.4rem .3rem;}
+.sb-lbl{font-size:.52rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+color:var(–ink-soft);opacity:.45;display:block;margin-bottom:.3rem;padding:0 .4rem;}
+.nav-item{display:flex;align-items:center;gap:.65rem;padding:.65rem .85rem;border-radius:var(–rad-btn);
+font-size:.84rem;font-weight:500;color:var(–ink-soft);cursor:pointer;
+transition:background .18s,color .18s;border:none;background:none;width:100%;text-align:left;
+-webkit-tap-highlight-color:transparent;}
+.nav-item svg{flex-shrink:0;opacity:.5;transition:opacity .18s;}
+.nav-item:hover{background:var(–bg3);color:var(–ink);}
+.nav-item:hover svg,.nav-item.active svg{opacity:.8;}
+.nav-item.active{background:var(–red-a);color:var(–red);}
+.nav-item.active svg{opacity:1;}
+.sb-div{height:1px;background:var(–glass-bdr);margin:.7rem 1.4rem;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;background:var(–bg);}
+.panel{display:none;padding:2.2rem 2.8rem;}
+.panel.active{display:block;}
+.ph{margin-bottom:2.2rem;padding-bottom:1.4rem;border-bottom:1px solid var(–glass-bdr);}
+.ph h1{font-family:‘DM Serif Display’,serif;font-weight:400;font-style:italic;
+font-size:1.9rem;letter-spacing:-.01em;margin-bottom:.25rem;}
+.ph p{font-size:.82rem;color:var(–ink-soft);line-height:1.6;}
+
+/* STATUS */
+#statusWrap{padding:1.2rem 2.8rem 0;}
+.status{padding:.8rem 1.1rem;font-size:.58rem;font-weight:700;letter-spacing:.16em;
+text-transform:uppercase;margin-bottom:1.5rem;display:none;border-radius:var(–rad-btn);}
+.status.ok{background:var(–green-a);color:var(–green);border:1px solid rgba(34,197,94,.15);display:block;}
+.status.err{background:var(–red-a);color:var(–red);border:1px solid rgba(200,16,46,.2);display:block;}
+.status.loading{background:var(–bg3);color:var(–ink-soft);border:1px solid var(–glass-bdr);display:block;}
+
+/* CARDS */
+.card{background:var(–bg2);border:1px solid var(–glass-bdr);border-radius:var(–rad);padding:1.8rem;}
+.card+.card{margin-top:1.4rem;}
+.card-ttl{font-size:.64rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+color:var(–ink-soft);margin-bottom:1.6rem;padding-bottom:.9rem;border-bottom:1px solid var(–glass-bdr);}
+
+/* UPLOAD LAYOUT */
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.8rem;align-items:start;}
+@media(max-width:960px){.upload-grid{grid-template-columns:1fr;}}
+
+/* DROP ZONE */
+.drop-zone{border:2px dashed rgba(255,255,255,.1);border-radius:var(–rad);padding:2.5rem 1.5rem;
+position:relative;/* needed for the overlaid file input */
+text-align:center;cursor:pointer;transition:border-color .25s,background .25s;background:var(–bg3);margin-bottom:1.3rem;}
+.drop-zone:hover,.drop-zone.over{border-color:var(–red);background:var(–red-a);}
+.drop-prev{width:100%;max-height:200px;object-fit:contain;display:none;margin-bottom:.7rem;border-radius:var(–rad-btn);}
+.drop-icon{font-size:2.2rem;display:block;margin-bottom:.8rem;opacity:.18;}
+.drop-main{font-size:.95rem;font-weight:500;color:var(–ink-mid);margin-bottom:.3rem;}
+.drop-hint{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(–ink-soft);}
+.drop-hint strong{color:var(–red);}
+.drop-fname{font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(–green);display:none;margin-bottom:.3rem;}
+/* #fileInput visibility handled by inline style (opacity:0, position:absolute) */
+
+/* FORM FIELDS */
+.field{margin-bottom:1.3rem;}
+.field label{display:block;font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+color:var(–ink-soft);margin-bottom:.55rem;}
+.field input,.field textarea,.field select{width:100%;background:var(–bg3);border:1px solid var(–glass-bdr);
+border-radius:var(–rad-btn);padding:.8rem 1rem;font-family:‘DM Sans’,sans-serif;font-size:.88rem;
+color:var(–ink);outline:none;transition:border-color .22s;resize:none;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(–red);}
+.field select option{background:var(–bg2);}
+.field textarea{min-height:78px;line-height:1.6;}
+.field textarea.tall{min-height:110px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;}
+.price-label{color:rgba(200,16,46,.8) !important;}
+.price-field{border-color:rgba(200,16,46,.2) !important;color:var(–red) !important;}
+.price-field:focus{border-color:var(–red) !important;}
+#subcatWrap{display:none;}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;
+background:var(–bg3);border:1px solid var(–glass-bdr);border-radius:var(–rad-btn);
+padding:1rem 1.2rem;margin-bottom:1.3rem;}
+.tog-info .t-lbl{font-size:.86rem;font-weight:500;margin-bottom:.18rem;}
+.tog-info .t-desc{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(–ink-soft);}
+.tog-wrap{position:relative;width:42px;height:22px;flex-shrink:0;}
+.tog-wrap input{opacity:0;width:0;height:0;position:absolute;}
+.tog-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:100px;cursor:pointer;transition:background .22s;}
+.tog-slider::before{content:’’;position:absolute;width:14px;height:14px;border-radius:50%;
+background:#fff;top:4px;left:4px;transition:transform .22s;box-shadow:0 1px 4px rgba(0,0,0,.5);}
+.tog-wrap input:checked+.tog-slider{background:var(–red);}
+.tog-wrap input:checked+.tog-slider::before{transform:translateX(20px);}
+
+.btn-publish{width:100%;padding:1rem;background:var(–ink);color:var(–bg);
+font-family:‘DM Sans’,sans-serif;font-size:.7rem;font-weight:700;
+letter-spacing:.2em;text-transform:uppercase;border:none;border-radius:var(–rad-btn);
+cursor:pointer;transition:background .28s var(–ease),transform .18s;}
+.btn-publish:hover{background:var(–red);color:#fff;transform:translateY(-2px);}
+.btn-publish:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+
+/* WORKS LIST */
+.list-ctrl{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:1.8rem;}
+.cnt-badge{background:var(–bg2);border:1px solid var(–glass-bdr);border-radius:var(–rad-btn);
+padding:.4rem .9rem;font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(–ink-soft);}
+.works-tabs{display:flex;align-items:stretch;border-radius:var(–rad);overflow:hidden;
+background:var(–glass);backdrop-filter:var(–blur);-webkit-backdrop-filter:var(–blur);
+border:1px solid var(–glass-bdr);box-shadow:0 8px 24px rgba(0,0,0,.4),inset 0 1px 0 var(–glass-top);
+position:relative;}
+.w-ind{position:absolute;top:0;bottom:0;left:0;background:var(–red);
+transition:left .38s var(–ease),width .38s var(–ease);z-index:0;
+box-shadow:0 2px 10px rgba(200,16,46,.4);}
+.w-tab{padding:.65rem 1.3rem;border:none;background:none;
+font-family:‘DM Sans’,sans-serif;font-size:.62rem;font-weight:700;
+text-transform:uppercase;letter-spacing:.14em;color:var(–ink-soft);
+cursor:pointer;position:relative;z-index:1;transition:color .25s;
+border-right:1px solid rgba(255,255,255,.04);-webkit-tap-highlight-color:transparent;white-space:nowrap;}
+.w-tab:last-child{border-right:none;}
+.w-tab:hover{color:var(–ink);}
+.w-tab.active{color:#fff;}
+.works-list{display:flex;flex-direction:column;gap:.55rem;}
+.aw-card{display:grid;grid-template-columns:76px 1fr auto;gap:1.1rem;align-items:center;
+background:var(–bg2);border:1px solid var(–glass-bdr);border-radius:var(–rad);
+padding:1.1rem 1.3rem;animation:cardIn .3s var(–ease) both;transition:border-color .22s;}
+.aw-card:hover{border-color:rgba(255,255,255,.11);}
+@keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+.aw-thumb{width:76px;height:76px;object-fit:cover;border-radius:var(–rad-btn);
+background:var(–bg3);border:1px solid var(–glass-bdr);flex-shrink:0;}
+.aw-body{min-width:0;}
+.aw-name{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:.98rem;margin-bottom:.25rem;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.aw-meta{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+color:var(–ink-soft);margin-bottom:.45rem;}
+.aw-badges{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;}
+.bdg{font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.16rem .55rem;border-radius:5px;}
+.bdg-type{color:var(–red);border:1px solid rgba(200,16,46,.22);background:var(–red-a);}
+.bdg-price{color:var(–green);border:1px solid rgba(34,197,94,.2);background:var(–green-a);}
+.bdg-sub{color:var(–ink-soft);border:1px solid var(–glass-bdr);background:var(–bg3);}
+.bdg-feat{color:var(–ink-soft);border:1px solid var(–glass-bdr);cursor:pointer;
+transition:all .18s;background:var(–bg3);}
+.bdg-feat:hover{border-color:var(–red);color:var(–red);}
+.bdg-feat.on{color:var(–red);border-color:rgba(200,16,46,.28);background:var(–red-a);}
+.aw-acts{display:flex;flex-direction:column;gap:.35rem;flex-shrink:0;}
+.btn-edit{background:none;border:1px solid var(–glass-bdr);color:var(–ink-soft);
+font-family:‘DM Sans’,sans-serif;font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+padding:.42rem .85rem;border-radius:var(–rad-btn);cursor:pointer;transition:background .18s,border-color .18s,color .18s;white-space:nowrap;}
+.btn-edit:hover{border-color:var(–ink-soft);color:var(–ink);background:rgba(255,255,255,.05);}
+.btn-del{background:none;border:1px solid rgba(200,16,46,.18);color:var(–red);
+font-family:‘DM Sans’,sans-serif;font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+padding:.42rem .85rem;border-radius:var(–rad-btn);cursor:pointer;transition:background .18s;white-space:nowrap;}
+.btn-del:hover{background:rgba(200,16,46,.08);}
+.list-empty{text-align:center;padding:5rem 2rem;background:var(–bg2);border:1px solid var(–glass-bdr);border-radius:var(–rad);}
+.list-empty .ei{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:2.2rem;opacity:.07;margin-bottom:.8rem;}
+.list-empty p{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(–ink-soft);line-height:2.4;}
+
+/* ── FEATURED PICKER ── */
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-bottom:2rem;}
+@media(max-width:700px){.feat-grid{grid-template-columns:1fr;}}
+.feat-slot{border:2px dashed rgba(255,255,255,.1);border-radius:var(–rad);overflow:hidden;
+background:var(–bg3);min-height:220px;position:relative;cursor:pointer;
+display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;
+transition:border-color .25s;}
+.feat-slot.filled{border-style:solid;border-color:rgba(200,16,46,.3);}
+.feat-slot:hover{border-color:rgba(200,16,46,.4);}
+.feat-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.feat-slot-ov{position:absolute;inset:0;background:rgba(0,0,0,.6);
+display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:1.2rem;
+opacity:0;transition:opacity .25s;}
+.feat-slot:hover .feat-slot-ov{opacity:1;}
+.feat-slot-ov .fs-title{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:.95rem;color:#fff;margin-bottom:.3rem;}
+.feat-slot-ov .fs-change{font-size:.5rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);}
+.feat-ph-icon{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:2rem;opacity:.1;position:relative;z-index:1;}
+.feat-ph-txt{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(–ink-soft);position:relative;z-index:1;}
+.feat-slot-lbl{font-size:.52rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+color:var(–red);opacity:.7;position:absolute;top:.8rem;left:.9rem;z-index:2;}
+
+/* artwork picker modal */
+.picker-modal{position:fixed;inset:0;z-index:8000;background:rgba(2,2,4,.95);
+display:none;flex-direction:column;overflow:hidden;}
+.picker-modal.open{display:flex;}
+.pm-hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+padding:1.1rem 2rem;border-bottom:1px solid var(–glass-bdr);background:var(–bg);}
+.pm-title{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:1.3rem;}
+.pm-close{background:var(–glass);border:1px solid var(–glass-bdr);border-radius:var(–rad-btn);
+padding:.45rem 1rem;font-family:‘DM Sans’,sans-serif;font-size:.62rem;font-weight:700;
+text-transform:uppercase;letter-spacing:.12em;color:var(–ink-soft);cursor:pointer;transition:color .22s,border-color .22s;}
+.pm-close:hover{color:var(–red);border-color:rgba(200,16,46,.3);}
+.pm-grid{flex:1;overflow-y:auto;padding:1.2rem 2rem;
+display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;}
+.pm-item{position:relative;overflow:hidden;cursor:pointer;border-radius:var(–rad-btn);
+border:2px solid var(–glass-bdr);aspect-ratio:4/5;background:var(–bg3);
+transition:border-color .22s,transform .22s;}
+.pm-item:hover{border-color:var(–red);transform:translateY(-3px);}
+.pm-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.pm-item-lbl{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 55%);
+display:flex;flex-direction:column;justify-content:flex-end;padding:.8rem;}
+.pm-item-t{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:.82rem;color:#fff;line-height:1.2;}
+.pm-item-m{font-size:.48rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-top:.15rem;}
+.pm-empty{grid-column:1/-1;text-align:center;padding:4rem;
+font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(–ink-soft);}
+
+/* ── ARTISTS ── */
+.artists-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.8rem;}
+@media(max-width:900px){.artists-grid{grid-template-columns:1fr;}}
+.ae-card{background:var(–bg2);border:1px solid var(–glass-bdr);border-radius:var(–rad);padding:1.8rem;}
+.ae-card h3{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:1.15rem;
+margin-bottom:1.4rem;padding-bottom:.9rem;border-bottom:1px solid var(–glass-bdr);
+display:flex;align-items:center;gap:.6rem;}
+.ae-card h3 .an{font-family:‘DM Sans’,sans-serif;font-size:.56rem;font-weight:700;
+letter-spacing:.18em;text-transform:uppercase;color:var(–red);opacity:.65;}
+.ae-photo{width:100%;aspect-ratio:4/5;max-height:180px;background:var(–bg3);
+border-radius:var(–rad-btn);border:1px solid var(–glass-bdr);overflow:hidden;
+display:flex;align-items:center;justify-content:center;margin-bottom:.9rem;
+position:relative;cursor:pointer;transition:border-color .22s;}
+.ae-photo:hover{border-color:var(–red);}
+.ae-photo img{width:100%;height:100%;object-fit:cover;display:none;}
+.ae-ph-lbl{font-size:.56rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(–ink-soft);opacity:.28;}
+.ae-ph-ov{position:absolute;inset:0;background:rgba(200,16,46,.5);
+display:none;align-items:center;justify-content:center;border-radius:var(–rad-btn);}
+.ae-photo:hover .ae-ph-ov{display:flex;}
+.ae-ph-ov span{font-size:.56rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#fff;}
+.ae-up-btn{display:block;width:100%;padding:.7rem;background:var(–bg3);border:1px solid var(–glass-bdr);
+border-radius:var(–rad-btn);font-family:‘DM Sans’,sans-serif;font-size:.62rem;font-weight:700;
+letter-spacing:.16em;text-transform:uppercase;color:var(–ink-soft);cursor:pointer;
+text-align:center;transition:border-color .22s,color .22s;margin-bottom:1.1rem;}
+.ae-up-btn:hover{border-color:var(–red);color:var(–red);}
+.aPhoto1In,.aPhoto2In{display:none;}
+.btn-save-a{width:100%;margin-top:.8rem;padding:.85rem;background:var(–ink);color:var(–bg);
+font-family:‘DM Sans’,sans-serif;font-size:.64rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+border:none;border-radius:var(–rad-btn);cursor:pointer;transition:background .28s var(–ease),transform .18s;}
+.btn-save-a:hover{background:var(–red);color:#fff;transform:translateY(-2px);}
+
+/* TOKEN */
+.tok-alert{background:var(–red-a);border:1px solid rgba(200,16,46,.18);border-radius:var(–rad);padding:1.7rem;margin-bottom:1.8rem;}
+.tok-alert h3{font-family:‘DM Serif Display’,serif;font-style:italic;font-size:1.05rem;margin-bottom:.5rem;}
+.tok-alert p{font-size:.8rem;color:var(–ink-mid);line-height:1.75;margin-bottom:1.1rem;}
+.tok-alert a{color:var(–red);text-decoration:none;font-weight:700;}
+.tok-row{display:flex;gap:.55rem;align-items:center;}
+.tok-inp{flex:1;background:var(–bg3);border:1px solid var(–glass-bdr);border-radius:var(–rad-btn);
+padding:.78rem 1rem;font-family:‘DM Sans’,sans-serif;font-size:.8rem;color:var(–ink);
+outline:none;transition:border-color .22s;}
+.tok-inp:focus{border-color:var(–red);}
+.btn-save-tok{background:var(–red);color:#fff;border:none;border-radius:var(–rad-btn);
+font-family:‘DM Sans’,sans-serif;font-size:.64rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+padding:.78rem 1.3rem;cursor:pointer;transition:background .18s;white-space:nowrap;}
+.btn-save-tok:hover{background:var(–red-h);}
+.info-row{display:flex;align-items:flex-start;justify-content:space-between;
+padding:.8rem 0;border-bottom:1px solid var(–glass-bdr);gap:1rem;}
+.info-row:last-child{border-bottom:none;}
+.ik{font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(–ink-soft);flex-shrink:0;}
+.iv{font-size:.86rem;font-weight:500;color:var(–ink);text-align:right;}
+.iv.red{color:var(–red);}
+
+/* MOBILE */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:250;-webkit-tap-highlight-color:transparent;}
+.sb-overlay.show{display:block;}
+/* ── MOBILE (≤768px) ── */
+@media(max-width:768px){
+/* Topbar */
+.topbar{padding:0 1rem;height:54px;}
+.burger{display:flex;}
+
+/* Sidebar: slide in from left */
+.sidebar{
+position:fixed;left:0;top:54px;bottom:0;z-index:260;
+transform:translateX(-110%);
+will-change:transform;
+transition:transform .30s cubic-bezier(0.19,1,0.22,1);
+padding-bottom:calc(1rem + env(safe-area-inset-bottom));
+box-shadow:8px 0 32px rgba(0,0,0,.5);
+width:82vw;max-width:280px;
+}
+.sidebar.open{transform:translateX(0);}
+
+/* Content scrolls full width */
+.content{
+width:100%;
+padding-bottom:calc(2rem + env(safe-area-inset-bottom));
+}
+.panel{padding:1.2rem 1rem;}
+.ph{margin-bottom:1.4rem;padding-bottom:1rem;}
+.ph h1{font-size:1.35rem;}
+.ph p{font-size:.78rem;}
+
+/* Status bar */
+#statusWrap{padding:.8rem 1rem 0;}
+.status{font-size:.56rem;padding:.75rem 1rem;}
+
+/* Upload: single col */
+.upload-grid{grid-template-columns:1fr;}
+.drop-zone{padding:2rem 1rem;}
+
+/* Form fields */
+.field-row{grid-template-columns:1fr;}
+.field{margin-bottom:1.1rem;}
+.card{padding:1.3rem;}
+.card-ttl{font-size:.6rem;}
+
+/* Works list */
+.list-ctrl{flex-direction:column;align-items:stretch;gap:.7rem;}
+.works-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.works-tabs::-webkit-scrollbar{display:none;}
+.w-tab{flex-shrink:0;padding:.62rem .95rem;font-size:.58rem;letter-spacing:.1em;}
+.aw-card{grid-template-columns:52px 1fr;gap:.75rem;padding:1rem;}
+.aw-thumb{width:52px;height:52px;}
+.aw-acts{flex-direction:row;grid-column:1/-1;gap:.3rem;}
+.btn-edit,.btn-del{flex:1;text-align:center;padding:.5rem .4rem;font-size:.54rem;}
+.aw-name{font-size:.9rem;}
+.aw-meta{font-size:.56rem;}
+
+/* Featured picker */
+.feat-grid{grid-template-columns:1fr;}
+.feat-slot{min-height:160px;}
+.pm-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.7rem;padding:1rem;}
+
+/* Artists */
+.artists-grid{grid-template-columns:1fr;}
+.ae-card{padding:1.3rem;}
+.ae-photo{max-height:160px;}
+
+/* Token */
+.tok-row{flex-direction:column;}
+.btn-save-tok{width:100%;}
+.tok-alert{padding:1.3rem;}
+}
+
+/* ── MOBILE SMALL (≤480px) ── */
+@media(max-width:480px){
+.topbar{padding:0 .85rem;}
+.tb-link{display:none;}
+.tb-logo .adm{display:none;}
+.tb-logo .sep{display:none;}
+.panel{padding:1rem .85rem;}
+.card{padding:1rem;}
+.feat-slot{min-height:140px;}
+.pm-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.55rem;}
+.aw-card{grid-template-columns:44px 1fr;gap:.6rem;padding:.85rem;}
+.aw-thumb{width:44px;height:44px;border-radius:6px;}
+.btn-publish,.btn-save-a{font-size:.62rem;padding:.95rem;}
+}
+
+/* ── TOUCH ── */
+@media(pointer:coarse){
+.nav-item{min-height:48px;}
+.btn-publish,.btn-save-a{min-height:52px;}
+.btn-edit,.btn-del{min-height:42px;}
+.w-tab{min-height:44px;}
+.drop-zone{min-height:150px;}
+.g-tab,.sub-chip{min-height:44px;}
+/* prevent iOS zoom on input focus */
+input,textarea,select{font-size:16px !important;}
+/* toggle: easier to tap */
+.tog-wrap{width:50px;height:28px;}
+.tog-slider::before{width:18px;height:18px;top:5px;left:5px;}
+.tog-wrap input:checked+.tog-slider::before{transform:translateX(22px);}
+}
+</style>
+
+</head>
+<body>
+
+<!-- LOGIN -->
+
+<div id="loginScreen">
+  <div class="lg-brand">
+    <div class="name bf">ST<span class="num">117</span></div>
+    <span class="sub">Admin Studio</span>
+  </div>
+  <div class="lg-card">
+    <h2>Welcome back</h2>
+    <p class="lg-sub">Sign in to manage your artworks and studio.</p>
+    <div class="lg-field">
+      <label for="pwInput">Password</label>
+      <input type="password" id="pwInput" placeholder="Enter password" autocomplete="current-password"/>
+    </div>
+    <div class="lg-err" id="loginErr"></div>
+    <button class="btn-login" id="loginBtn">Enter Studio →</button>
+  </div>
+</div>
+
+<!-- APP -->
+
+<div id="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:.9rem;">
+      <button class="burger" id="burgerBtn" aria-label="Menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect y="2" width="18" height="2" rx="1" fill="currentColor"/>
+          <rect y="8" width="18" height="2" rx="1" fill="currentColor"/>
+          <rect y="14" width="18" height="2" rx="1" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="tb-logo bf">ST<span class="num">117</span><span class="sep">/</span><span class="adm">Admin</span></div>
+    </div>
+    <div class="tb-right">
+      <a class="tb-link" href="index.html" target="_blank">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M7 1h4v4M11 1L6 6M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        View Site
+      </a>
+      <button class="tb-out" id="logoutBtn">Log Out</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <div class="sb-overlay" id="sbOverlay"></div>
+
+```
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-name bf">ST<span class="num">117</span></div>
+    <div class="sb-tag">Visual Art Studio<br>North Macedonia</div>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-sec">
+    <span class="sb-lbl">Artworks</span>
+    <button class="nav-item active" data-panel="upload">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 1v9M5 3.5L8 1l3 2.5M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Publish Artwork
+    </button>
+    <button class="nav-item" data-panel="works">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+      All Works
+    </button>
+  </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">Site</span>
+    <button class="nav-item" data-panel="featured">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.8 3.6L14 5.5l-3 2.9.7 4.1L8 10.4l-3.7 2.1.7-4.1-3-2.9 4.2-.9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      Featured Works
+    </button>
+    <button class="nav-item" data-panel="artists">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="11" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 14c0-2.761 1.79-5 4-5M7 14c0-2.761 1.79-5 4-5s4 2.239 4 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Artists &amp; Bio
+    </button>
+    <button class="nav-item" data-panel="token">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.4"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      GitHub Token
+    </button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div id="statusWrap"><div class="status" id="statusBar"></div></div>
+  <!-- Token warning — shows if no token saved -->
+  <div id="tokenWarn" style="display:none;align-items:center;gap:.8rem;background:rgba(200,16,46,.08);border:1px solid rgba(200,16,46,.18);border-radius:8px;padding:.75rem 1.1rem;margin:.8rem 1.4rem 0;font-size:.72rem;color:rgba(200,16,46,.85);">
+    <span>⚠</span>
+    <span>No GitHub token saved — <button onclick="switchPanel('token')" style="background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;font-size:.72rem;text-decoration:underline;padding:0;">set it here</button> before publishing.</span>
+  </div>
+
+  <!-- PUBLISH -->
+  <div class="panel active" id="panel-upload">
+    <div class="ph"><h1>Publish Artwork</h1><p>Upload a new artwork — it appears on your site in ~1 minute after publishing.</p></div>
+    <div class="upload-grid">
+      <div>
+        <div class="card">
+          <div class="card-ttl">Artwork Image</div>
+          <div class="drop-zone" id="dropZone">
+            <img class="drop-prev" id="dropPrev" alt=""/>
+            <span class="drop-fname" id="dropFname"></span>
+            <span class="drop-icon" id="dropIcon">🖼</span>
+            <div class="drop-main" id="dropMain">Drop image here</div>
+            <div class="drop-hint" id="dropHint">or <strong>tap to browse</strong></div>
+            <!-- File input overlays the entire drop zone — works on all mobile browsers -->
+            <input type="file" id="fileInput" accept="image/*,image/jpeg,image/png,image/webp,image/heic"
+              style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:10;font-size:16px;"/>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-ttl">Artwork Details</div>
+          <div class="field"><label>Title *</label><input type="text" id="fTitle" placeholder="Name of the artwork"/></div>
+          <div class="field-row">
+            <div class="field">
+              <label>Art Type</label>
+              <select id="fType">
+                <option value="">— Select —</option>
+                <option value="Painting">Painting</option><option value="Drawing">Drawing</option>
+                <option value="Photography">Photography</option><option value="Printmaking">Printmaking</option>
+                <option value="Etching">Etching</option><option value="Linocut">Linocut</option>
+                <option value="Screen Print">Screen Print</option><option value="Illustration">Illustration</option>
+                <option value="Mixed Media">Mixed Media</option>
+              </select>
+            </div>
+            <div class="field" id="subcatWrap"><label>Subcategory</label><select id="fSubcat"><option value="">— Select —</option></select></div>
+          </div>
+          <div class="field"><label>Description</label><textarea id="fDesc" placeholder="The story behind this work…"></textarea></div>
+          <div class="field-row">
+            <div class="field"><label>Size</label><input type="text" id="fSize" placeholder="60 × 80 cm"/></div>
+            <div class="field"><label>Year</label><input type="text" id="fYear" placeholder="2026"/></div>
+          </div>
+          <div class="field"><label class="price-label">Price</label><input class="price-field" type="text" id="fPrice" placeholder="€450 or Not for sale"/></div>
+          <div class="toggle-row">
+            <div class="tog-info"><div class="t-lbl">Feature on homepage</div><div class="t-desc">Show in Featured section</div></div>
+            <div class="tog-wrap"><input type="checkbox" id="fFeatured"/><div class="tog-slider"></div></div>
+          </div>
+          <div class="field" id="qualityWrap">
+            <label>Image Quality</label>
+            <select id="fQuality">
+              <option value="lossless">Lossless — original quality, larger file</option>
+              <option value="high" selected>High — 90% quality, excellent &amp; fast</option>
+              <option value="balanced">Balanced — 80% quality, best web speed</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;">
+            <button class="btn-publish" id="publishBtn">Publish Artwork →</button>
+            <button id="cancelEditBtn" style="display:none;background:none;border:1px solid var(--glass-bdr);color:var(--ink-soft);font-family:'DM Sans',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:.85rem 1.4rem;border-radius:var(--rad-btn);cursor:pointer;transition:all .2s;">Cancel Edit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALL WORKS -->
+  <div class="panel" id="panel-works">
+    <div class="ph"><h1>All Works</h1><p>Manage, feature and delete published artworks.</p></div>
+    <div class="list-ctrl">
+      <span class="cnt-badge" id="listCount">0 artworks</span>
+      <div class="works-tabs" id="worksTabs">
+        <div class="w-ind" id="wInd"></div>
+        <button class="w-tab active" data-lcat="all">All</button>
+        <button class="w-tab" data-lcat="paintings">Paintings</button>
+        <button class="w-tab" data-lcat="drawings">Drawings</button>
+        <button class="w-tab" data-lcat="photography">Photography</button>
+        <button class="w-tab" data-lcat="printmaking">Printmaking</button>
+      </div>
+    </div>
+    <div class="works-list" id="awList"></div>
+  </div>
+
+  <!-- FEATURED -->
+  <div class="panel" id="panel-featured">
+    <div class="ph"><h1>Featured Works</h1><p>Choose exactly 2 artworks to spotlight on the homepage. Click a slot to pick from your published works.</p></div>
+    <div class="feat-grid">
+      <div class="feat-slot" id="featSlot1">
+        <span class="feat-slot-lbl">Featured 1</span>
+        <div class="feat-ph-icon">—</div>
+        <div class="feat-ph-txt">Click to choose</div>
+        <div class="feat-slot-ov"><div class="fs-title" id="feat1Title"></div><div class="fs-change">Click to change</div></div>
+      </div>
+      <div class="feat-slot" id="featSlot2">
+        <span class="feat-slot-lbl">Featured 2</span>
+        <div class="feat-ph-icon">—</div>
+        <div class="feat-ph-txt">Click to choose</div>
+        <div class="feat-slot-ov"><div class="fs-title" id="feat2Title"></div><div class="fs-change">Click to change</div></div>
+      </div>
+    </div>
+    <button class="btn-publish" id="saveFeatBtn">Save Featured Works →</button>
+  </div>
+
+  <!-- ARTISTS -->
+  <div class="panel" id="panel-artists">
+    <div class="ph"><h1>Artists &amp; Bio</h1><p>Update photos and biography. Changes appear on the site immediately after saving.</p></div>
+    <div class="artists-grid">
+      <div class="ae-card">
+        <h3><span class="an">01</span> First Artist</h3>
+        <div class="ae-photo" id="aPrev1" onclick="document.querySelector('.aPhoto1In').click()">
+          <span class="ae-ph-lbl">[ Portrait ]</span>
+          <img id="aImg1" src="" alt=""/>
+          <div class="ae-ph-ov"><span>Change Photo</span></div>
+        </div>
+        <div style="position:relative;display:inline-block;">
+          <label class="ae-up-btn">Upload Portrait
+            <input type="file" class="aPhoto1In" id="aPhoto1" accept="image/*" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:16px;"/>
+          </label>
+        </div>
+        <div class="field"><label>Full Name</label><input type="text" id="a1name" placeholder="e.g. Shuki Neziri"/></div>
+        <div class="field"><label>Role / Discipline</label><input type="text" id="a1role" placeholder="e.g. Painter &amp; Printmaker"/></div>
+        <div class="field"><label>Biography</label><textarea class="tall" id="a1bio" placeholder="Artist biography…"></textarea></div>
+        <button class="btn-save-a" id="saveArtist1Btn">Save Artist 1 →</button>
+      </div>
+      <div class="ae-card">
+        <h3><span class="an">02</span> Second Artist</h3>
+        <div class="ae-photo" id="aPrev2" onclick="document.querySelector('.aPhoto2In').click()">
+          <span class="ae-ph-lbl">[ Portrait ]</span>
+          <img id="aImg2" src="" alt=""/>
+          <div class="ae-ph-ov"><span>Change Photo</span></div>
+        </div>
+        <div style="position:relative;display:inline-block;">
+          <label class="ae-up-btn">Upload Portrait
+            <input type="file" class="aPhoto2In" id="aPhoto2" accept="image/*" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:16px;"/>
+          </label>
+        </div>
+        <div class="field"><label>Full Name</label><input type="text" id="a2name" placeholder="e.g. Luran Osmani"/></div>
+        <div class="field"><label>Role / Discipline</label><input type="text" id="a2role" placeholder="e.g. Photographer &amp; Illustrator"/></div>
+        <div class="field"><label>Biography</label><textarea class="tall" id="a2bio" placeholder="Artist biography…"></textarea></div>
+        <button class="btn-save-a" id="saveArtist2Btn">Save Artist 2 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOKEN -->
+  <div class="panel" id="panel-token">
+    <div class="ph"><h1>GitHub Token</h1><p>Required to publish artworks to your repository.</p></div>
+    <div class="tok-alert">
+      <h3>Personal Access Token</h3>
+      <p>Saved in this browser — re-enter only if it expires or you switch devices.<br><br>
+        No token? <a href="https://github.com/settings/tokens/new?scopes=repo&description=ST117+Admin" target="_blank">Generate on GitHub →</a> (check the <strong>repo</strong> scope)</p>
+      <div class="tok-row">
+        <input class="tok-inp" type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
+        <button class="btn-save-tok" id="saveTokenBtn">Save</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-ttl">Status</div>
+      <div class="info-row"><span class="ik">Token</span><span class="iv" id="tokenStatus">—</span></div>
+      <div class="info-row"><span class="ik">Repository</span><span class="iv" id="tokenRepo">—</span></div>
+      <div class="info-row"><span class="ik">Branch</span><span class="iv">main</span></div>
+      <div class="info-row"><span class="ik">Live Site</span><span class="iv" id="siteUrl" style="font-size:.72rem;word-break:break-all;"></span></div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+```
+
+  </div><!-- /app-body -->
+</div><!-- /app -->
+
+<!-- ARTWORK PICKER MODAL -->
+
+<div class="picker-modal" id="pickerModal">
+  <div class="pm-hdr">
+    <h2 class="pm-title">Choose Featured Artwork</h2>
+    <button class="pm-close" id="pickerClose">✕ Close</button>
+  </div>
+  <div class="pm-grid" id="pickerGrid"></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ── CONFIG ── */
+var OWNER = 'sitoshtyp-creator';
+var REPO  = 'sitoshtyp-creator.github.io';
+var BRANCH = 'main';
+var PASSWORD = 'Tetova357357';
+
+/* ── DEFAULT TOKEN — paste your ghp_ token here once, it will always be used ── */
+var DEFAULT_TOKEN = 'ghp_WmguVMh0YFey3NNu4k5wAH1EQ36Uxv'; /* <-- paste your token between these quotes */
+
+var CAT_MATCH = {
+  paintings:   ['painting','paintings','mixed media','tempera'],
+  drawings:    ['drawing','drawings','illustration','sketch'],
+  photography: ['photography','photo'],
+  printmaking: ['printmaking','print','etching','linocut','screen print','woodblock','monotype','drypoint','intaglio']
+};
+var SUBCATS = {
+  'Painting':    ['Oil','Acrylic','Watercolor','Gouache','Tempera','Mixed'],
+  'Drawing':     ['Pencil','Charcoal','Ink','Portrait','Figure','Sketch'],
+  'Photography': ['Portrait','Landscape','Street','Documentary','Abstract','Architecture'],
+  'Printmaking': ['Etching','Linocut','Screen Print','Woodblock','Monotype','Drypoint'],
+  'Etching':     ['Drypoint','Intaglio','Aquatint'],
+  'Linocut':     ['Relief','Reduction','Multi-block'],
+  'Screen Print':['Silkscreen','Photographic','Hand-drawn'],
+  'Illustration':['Digital','Traditional','Editorial'],
+  'Mixed Media': ['Collage','Assemblage','Mixed']
+};
+
+function rawUrl(p){
+  /* Primary: GitHub Pages URL — same domain, consistent with index, no CORS */
+  return 'https://'+OWNER+'.github.io/'+p+'?_='+Date.now();
+}
+function rawStable(p){ return 'https://'+OWNER+'.github.io/'+p; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── AUTH ── */
+if(sessionStorage.getItem('st117_auth')==='1') unlock();
+var _lb=document.getElementById('loginBtn'); if(_lb) _lb.addEventListener('click', tryLogin);
+var _pi=document.getElementById('pwInput'); if(_pi) _pi.addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
+function tryLogin(){
+  var pw = document.getElementById('pwInput').value;
+  if(pw === PASSWORD){ sessionStorage.setItem('st117_auth','1'); unlock(); }
+  else{ document.getElementById('loginErr').textContent='Incorrect password.'; document.getElementById('pwInput').value=''; document.getElementById('pwInput').focus(); }
+}
+function unlock(){ document.getElementById('loginScreen').classList.add('gone'); document.getElementById('app').classList.add('on'); initApp(); }
+var _lo=document.getElementById('logoutBtn'); if(_lo) _lo.addEventListener('click', function(){ sessionStorage.removeItem('st117_auth'); location.reload(); });
+
+/* ── PANELS ── */
+function switchPanel(id){
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var p = document.getElementById('panel-'+id); if(p) p.classList.add('active');
+  document.querySelectorAll('.nav-item[data-panel="'+id+'"]').forEach(function(n){ n.classList.add('active'); });
+  closeSidebar();
+  if(id==='works') setTimeout(refreshWInd,60);
+  if(id==='featured') loadFeaturedPanel();
+}
+document.querySelectorAll('.nav-item').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    switchPanel(btn.dataset.panel);
+    if(btn.dataset.panel==='works'&&window._aw) renderList(window._aw,activeLcat);
+    if(btn.dataset.panel==='featured') renderFeatSlots();
+  });
+});
+
+/* ── MOBILE SIDEBAR ── */
+var sidebar = document.getElementById('sidebar');
+var sbOverlay = document.getElementById('sbOverlay');
+var _bb=document.getElementById('burgerBtn'); if(_bb) _bb.addEventListener('click', function(){ if(sidebar)sidebar.classList.toggle('open'); if(sbOverlay)sbOverlay.classList.toggle('show'); });
+if(sbOverlay) sbOverlay.addEventListener('click', closeSidebar);
+function closeSidebar(){
+  if(sidebar) sidebar.classList.remove('open');
+  if(sbOverlay) sbOverlay.classList.remove('show');
+}
+
+/* ── STATUS ── */
+var stT = null;
+function showStatus(msg, type){
+  var bar = document.getElementById('statusBar');
+  if(!bar) return;
+  bar.textContent = msg; bar.className = 'status '+(type||'');
+  if(stT) clearTimeout(stT);
+  /* auto-clear success/error after 7s; loading clears when next status fires */
+  if(type !== 'loading') stT = setTimeout(function(){ bar.className='status'; bar.textContent=''; }, 7000);
+}
+
+/* ── WORKS TAB INDICATOR ── */
+var activeLcat = 'all';
+function refreshWInd(){
+  var tabs = document.getElementById('worksTabs');
+  var ind  = document.getElementById('wInd');
+  if(!tabs||!ind) return;
+  var active = tabs.querySelector('.w-tab.active'); if(!active) return;
+  var tr = tabs.getBoundingClientRect(); var ar = active.getBoundingClientRect();
+  ind.style.width = ar.width+'px'; ind.style.left = (ar.left-tr.left)+'px'; ind.style.top='0'; ind.style.bottom='0';
+}
+var _wt=document.getElementById('worksTabs'); (_wt?_wt.querySelectorAll('.w-tab'):[]).forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.w-tab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active'); activeLcat = btn.dataset.lcat;
+    setTimeout(refreshWInd,20);
+    if(window._aw) renderList(window._aw, activeLcat);
+  });
+});
+window.addEventListener('resize', function(){ if(document.getElementById('worksTabs')) refreshWInd(); }, {passive:true});
+
+/* ── GITHUB TOKEN ── */
+/* ── GITHUB TOKEN — load from localStorage, fall back to DEFAULT_TOKEN ── */
+var ghToken = localStorage.getItem('st117_token') || DEFAULT_TOKEN || '';
+/* If DEFAULT_TOKEN is set and nothing in localStorage yet, save it automatically */
+if(DEFAULT_TOKEN && !localStorage.getItem('st117_token')){
+  localStorage.setItem('st117_token', DEFAULT_TOKEN);
+}
+if(ghToken){
+  var _gti=document.getElementById('ghTokenInput');
+  if(_gti) _gti.value=ghToken;
+  /* updateTokenStatus called in initApp after app is visible */
+}
+var _stb=document.getElementById('saveTokenBtn'); if(_stb) _stb.addEventListener('click', function(){'use strict';
+  var v = document.getElementById('ghTokenInput').value.trim();
+  if(!v){ showStatus('Token cannot be empty','err'); return; }
+  ghToken = v; localStorage.setItem('st117_token', v); updateTokenStatus(); showStatus('✓ Token saved','ok');
+});
+function updateTokenStatus(){
+  var ts = document.getElementById('tokenStatus');
+  if(ts){ ts.textContent = ghToken ? '✓ Saved' : '— Not set'; ts.style.color = ghToken ? 'var(--green)' : ''; }
+  var tr = document.getElementById('tokenRepo'); if(tr) tr.textContent = OWNER+'/'+REPO;
+  var su = document.getElementById('siteUrl'); if(su) su.textContent = 'https://'+OWNER+'.github.io';
+  /* Show token warning banner if no token set */
+  var warn=document.getElementById('tokenWarn');
+  if(warn) warn.style.display=ghToken?'none':'flex';
+}
+
+/* ── GITHUB API ── */
+var API = 'https://api.github.com/repos/'+OWNER+'/'+REPO+'/contents/';
+function ghH(){ return {'Authorization':'Bearer '+ghToken,'Content-Type':'application/json','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
+function ghFetch(method, path, body){
+  return fetch(API+path, {method:method, headers:ghH(), body:body?JSON.stringify(body):undefined})
+    .then(function(r){
+      if(r.status===404) return null;
+      if(r.status===422) return r.json().then(function(data){
+        throw new Error('SHA conflict — try again ('+( data.message||'422')+'). If this keeps happening, reload the admin page.');
+      });
+      return r.json().then(function(data){
+        if(!r.ok) throw new Error(data.message||'GitHub error '+r.status+' on '+path);
+        return data;
+      });
+    });
+}
+function loadData(){
+  return ghFetch('GET','artworks.json').then(function(f){
+    if(!f) return {list:[],sha:null}; /* 404 — file doesn't exist yet */
+    try{
+      var raw=f.content.replace(/[\r\n\s]/g,'');
+      var list=JSON.parse(atob(raw));
+      if(!Array.isArray(list)) list=[];
+      return {list:list, sha:f.sha};
+    }catch(e){
+      console.warn('[ST117] artworks.json parse error',e);
+      return {list:[], sha:f.sha};
+    }
+  });
+}
+/* ── IMAGE COMPRESSION — canvas resize before upload ──
+   Max dimension: 1800px on longest side
+   Quality: 0.88 (JPEG) — excellent quality, ~70% smaller than raw
+   PNG inputs are converted to JPEG for size savings
+   Keeps original if already small enough
+*/
+function compressAndEncode(file, qualityMode){
+  return new Promise(function(resolve,reject){
+    var MAX=1800;
+    var QUALITY=qualityMode==='lossless'?1.0:qualityMode==='balanced'?0.80:0.90;
+    var skipResize=qualityMode==='lossless';
+    /* read file as data URL */
+    var reader=new FileReader();
+    reader.onerror=function(){reject(new Error('Cannot read file'));};
+    reader.onload=function(ev){
+      var img=new Image();
+      img.onerror=function(){reject(new Error('Cannot decode image'));};
+      img.onload=function(){
+        var w=img.naturalWidth, h=img.naturalHeight;
+        /* scale down if needed (skip for lossless) */
+        if(!skipResize&&(w>MAX||h>MAX)){
+          var ratio=Math.min(MAX/w,MAX/h);
+          w=Math.round(w*ratio);
+          h=Math.round(h*ratio);
+        }
+        var canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        var ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        /* encode — always JPEG for uploads */
+        var dataUrl=canvas.toDataURL('image/jpeg',QUALITY);
+        var base64=dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ── SUBCATS ── */
+var _ft=document.getElementById('fType'); if(_ft) _ft.addEventListener('change', function(){
+  var type = this.value; var wrap = document.getElementById('subcatWrap'); var sel = document.getElementById('fSubcat');
+  var subs = SUBCATS[type];
+  if(subs&&subs.length){ sel.innerHTML='<option value="">— Select —</option>'+subs.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join(''); wrap.style.display='block'; }
+  else{ sel.innerHTML='<option value="">— Select —</option>'; wrap.style.display='none'; }
+});
+
+/* ── DROP ZONE ── */
+var pendingFile = null;
+var dz = document.getElementById('dropZone'); var fi = document.getElementById('fileInput');
+/* drag-and-drop (desktop) */
+if(dz){
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function(){ dz.classList.remove('over'); });
+  dz.addEventListener('drop', function(e){
+    e.preventDefault(); dz.classList.remove('over');
+    var f=e.dataTransfer.files[0];
+    if(f&&f.type.startsWith('image/')) loadPreview(f);
+  });
+}
+if(fi){
+  fi.addEventListener('change', function(){ if(fi.files[0]){ loadPreview(fi.files[0]); } });
+  fi.addEventListener('click', function(){ this.value=''; });
+}
+function loadPreview(f){
+  pendingFile=f;
+  var r=new FileReader();
+  r.onerror=function(){showStatus('Could not read image file','err');pendingFile=null;};
+  r.onload=function(e){
+    var prev=document.getElementById('dropPrev');
+    var fname=document.getElementById('dropFname');
+    if(prev){prev.src=e.target.result;prev.style.display='block';}
+    var kb=Math.round(f.size/1024);
+    var sizeStr=kb>1024?(kb/1024).toFixed(1)+' MB':kb+' KB';
+    if(fname){fname.textContent=f.name+' ('+sizeStr+')';fname.style.display='block';}
+    ['dropIcon','dropMain','dropHint'].forEach(function(id){
+      var el=document.getElementById(id);if(el)el.style.display='none';
+    });
+  };
+  r.readAsDataURL(f);
+}
+function resetForm(){
+  pendingFile=null;
+  document.getElementById('dropPrev').style.display='none'; document.getElementById('dropFname').style.display='none';
+  document.getElementById('dropIcon').style.display='block'; document.getElementById('dropMain').style.display='block'; document.getElementById('dropHint').style.display='block';
+  if(fi) fi.value='';
+  ['fTitle','fDesc','fSize','fYear','fPrice'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('fType').value=''; document.getElementById('fSubcat').value='';
+  document.getElementById('fFeatured').checked=false; document.getElementById('subcatWrap').style.display='none';
+  var q=document.getElementById('fQuality');if(q)q.value='high';
+}
+
+/* ── PUBLISH ── */
+var _pb=document.getElementById('publishBtn'); if(_pb) _pb.addEventListener('click', function(){
+  if(!ghToken){ showStatus('Save your GitHub token first (GitHub Token in sidebar)','err'); return; }
+  var title = document.getElementById('fTitle').value.trim();
+  if(!title){ showStatus('Enter a title','err'); return; }
+
+  /* EDIT MODE — no new image required */
+  if(editingId){ saveEditedWork(editingId, title); return; }
+
+  if(!pendingFile){ showStatus('Select an image first','err'); return; }
+
+  var btn = document.getElementById('publishBtn'); btn.disabled=true; btn.textContent='Publishing…';
+  var ext = 'jpg'; /* always JPEG after compression */
+  var safe = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'-'+Date.now()+'.'+ext;
+  var imgPath = 'images/'+safe;
+
+  showStatus('Step 1/3 — Compressing & uploading image…','loading');
+  var qualMode=document.getElementById('fQuality').value;
+  compressAndEncode(pendingFile, qualMode)
+  .then(function(b64){
+    return ghFetch('PUT', imgPath, {message:'Add image: '+safe, content:b64, branch:BRANCH});
+  })
+  .then(function(resp){
+    if(!resp||!resp.content) throw new Error('Image upload failed — check token has "repo" or "contents:write" scope');
+    showStatus('Step 2/3 — Loading artwork list…','loading');
+    return loadData();
+  })
+  .then(function(result){
+    showStatus('Step 3/3 — Saving artwork data…','loading');
+    var list=result.list; var sha=result.sha;
+    list.unshift({
+      id: Date.now(), image: imgPath, title: title,
+      type: document.getElementById('fType').value||'',
+      subcategory: document.getElementById('fSubcat').value||'',
+      description: document.getElementById('fDesc').value.trim()||'',
+      size: document.getElementById('fSize').value.trim()||'',
+      year: document.getElementById('fYear').value.trim()||'',
+      price: document.getElementById('fPrice').value.trim()||'',
+      featured: document.getElementById('fFeatured').checked,
+      date: new Date().toISOString()
+    });
+    var _pjson=JSON.stringify(list,null,2);
+    var content;try{content=btoa(unescape(encodeURIComponent(_pjson)));}catch(e){content=btoa(unescape(encodeURIComponent(_pjson.replace(/[\u0080-\uFFFF]/g,'?'))));}
+    var body = {message:'Publish: '+title, content:content, branch:BRANCH};
+    if(sha) body.sha=sha;
+    return ghFetch('PUT','artworks.json',body).then(function(r){
+      if(!r||(!r.content&&!r.commit)) throw new Error('Failed to save artworks.json — try again');
+      return list;
+    });
+  })
+  .then(function(list){
+    showStatus('✓ Published! Site updates in ~1 minute.','ok');
+    resetForm(); window._aw=list;
+    switchPanel('works'); renderList(list,'all');
+  })
+  .catch(function(err){
+    showStatus('✗ '+(err&&err.message?err.message:'Unknown error'),'err');
+    console.error('[ST117]',err);
+  })
+  .then(function(){
+    var b=document.getElementById('publishBtn');
+    if(b&&!editingId){b.disabled=false;b.textContent='Publish Artwork →';}
+  });
+});
+
+
+
+/* ── EDIT STATE ── */
+var editingId = null;
+var _ceb=document.getElementById('cancelEditBtn');
+if(_ceb) _ceb.addEventListener('click', function(){ cancelEdit(); });
+
+function openEditPanel(id){
+  var art=(window._aw||[]).find(function(x){return x.id===id;});
+  if(!art){showStatus('Artwork not found','err');return;}
+  editingId=id;
+  /* fill form */
+  document.getElementById('fTitle').value=art.title||'';
+  var typeEl=document.getElementById('fType');
+  typeEl.value=art.type||'';
+  typeEl.dispatchEvent(new Event('change'));
+  setTimeout(function(){
+    var sc=document.getElementById('fSubcat');
+    if(sc)sc.value=art.subcategory||'';
+  },60);
+  document.getElementById('fDesc').value=art.description||'';
+  document.getElementById('fSize').value=art.size||'';
+  document.getElementById('fYear').value=art.year||'';
+  document.getElementById('fPrice').value=art.price||'';
+  document.getElementById('fFeatured').checked=!!art.featured;
+  /* show current image preview */
+  var prev=document.getElementById('dropPrev');
+  if(prev){prev.src=rawStable(art.image);prev.style.display='block';}
+  var fname=document.getElementById('dropFname');
+  if(fname){fname.textContent='Current image — drop new one to replace';fname.style.display='block';}
+  ['dropIcon','dropMain','dropHint'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  pendingFile=null; /* clear any stale file */
+  /* update UI */
+  document.getElementById('publishBtn').textContent='Save Changes →';
+  var ph=document.querySelector('#panel-upload .ph h1');if(ph)ph.textContent='Edit Artwork';
+  var cb=document.getElementById('cancelEditBtn');if(cb)cb.style.display='inline-flex';
+  switchPanel('upload');
+  showStatus('Editing "'+esc(art.title)+'" — update fields and press Save Changes →','loading');
+}
+
+function cancelEdit(){
+  editingId=null;
+  pendingFile=null;
+  resetForm();
+  var pb=document.getElementById('publishBtn');
+  if(pb) pb.textContent='Publish Artwork →';
+  var ph=document.querySelector('#panel-upload .ph h1');
+  if(ph) ph.textContent='Publish Artwork';
+  var sb=document.getElementById('statusBar');
+  if(sb){sb.className='status';sb.textContent='';}
+  var cb=document.getElementById('cancelEditBtn');
+  if(cb) cb.style.display='none';
+}
+
+/* called when in edit mode */
+function saveEditedWork(id, title){
+  var btn=document.getElementById('publishBtn');
+  if(btn){btn.disabled=true; btn.textContent='Saving…';}
+  var oldArtwork=(window._aw||[]).find(function(x){return x.id===id;});
+  if(!oldArtwork){showStatus('Artwork not found','err');btn.disabled=false;btn.textContent='Save Changes →';return;}
+
+  var doSave=function(newImgPath){
+    showStatus('Saving metadata…','loading');
+    loadData().then(function(result){
+      var list=result.list; var sha=result.sha;
+      var idx=list.findIndex(function(x){return x.id===id;});
+      if(idx===-1)throw new Error('Artwork not found in JSON');
+      list[idx]=Object.assign({},list[idx],{
+        title:title,
+        type:document.getElementById('fType').value||'',
+        subcategory:document.getElementById('fSubcat').value||'',
+        description:document.getElementById('fDesc').value.trim()||'',
+        size:document.getElementById('fSize').value.trim()||'',
+        year:document.getElementById('fYear').value.trim()||'',
+        price:document.getElementById('fPrice').value.trim()||'',
+        featured:document.getElementById('fFeatured').checked,
+        image:newImgPath||list[idx].image
+      });
+      var _ejson=JSON.stringify(list,null,2);
+      var content;try{content=btoa(unescape(encodeURIComponent(_ejson)));}catch(e){content=btoa(unescape(encodeURIComponent(_ejson.replace(/[\u0080-\uFFFF]/g,'?'))));}
+      var body={message:'Edit: '+title,content:content,branch:BRANCH}; if(sha)body.sha=sha;
+      return ghFetch('PUT','artworks.json',body).then(function(){return list;});
+    }).then(function(list){
+      showStatus('✓ Changes saved! Site updates in ~1 minute.','ok');
+      window._aw=list;
+      cancelEdit();
+      switchPanel('works'); renderList(list,activeLcat);
+    }).catch(function(err){
+      showStatus('✗ '+err.message,'err');
+    }).then(function(){
+      if(btn){btn.disabled=false; btn.textContent='Save Changes →';}
+    });
+  };
+
+  /* if new image selected, upload it and delete old one */
+  if(pendingFile){
+    var ext='jpg';
+    var safe=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'-'+Date.now()+'.'+ext;
+    var newImgPath='images/'+safe;
+    showStatus('Uploading new image…','loading');
+    compressAndEncode(pendingFile, document.getElementById('fQuality')?document.getElementById('fQuality').value:'high').then(function(b64){
+      return ghFetch('PUT',newImgPath,{message:'Replace image: '+safe,content:b64,branch:BRANCH});
+    }).then(function(resp){
+      if(!resp)throw new Error('Image upload failed');
+      /* delete old image */
+      var oldImg=oldArtwork.image;
+      return ghFetch('GET',oldImg).then(function(f){
+        if(f&&f.sha)return ghFetch('DELETE',oldImg,{message:'Delete old image',sha:f.sha,branch:BRANCH});
+      }).catch(function(){}).then(function(){return newImgPath;});
+    }).then(function(newPath){
+      doSave(newPath);
+    }).catch(function(err){
+      showStatus('✗ '+err.message,'err');
+      btn.disabled=false; btn.textContent='Save Changes →';
+    });
+  } else {
+    /* no new image — just update metadata */
+    doSave(null);
+  }
+}
+/* ── WORKS LIST ── */
+function catMatchA(a,cat){ if(cat==='all') return true; var t=(a.type||'').toLowerCase(); return (CAT_MATCH[cat]||[]).some(function(m){return t===m||t.indexOf(m)!==-1;}); }
+function renderList(list, cat){
+  window._aw=list;
+  var filtered=list.filter(function(a){return catMatchA(a,cat);});
+  document.getElementById('listCount').textContent=filtered.length+' artwork'+(filtered.length!==1?'s':'');
+  var el=document.getElementById('awList');
+  if(!filtered.length){el.innerHTML='<div class="list-empty"><div class="ei">—</div><p>No artworks here yet.<br>Publish your first one.</p></div>';return;}
+  el.innerHTML=filtered.map(function(a,i){
+    var imgSrc=rawStable(a.image);
+    var meta=[a.type,a.year,a.size].filter(Boolean).join(' · ');
+    return'<div class="aw-card" style="animation-delay:'+(i*.035)+'s">'
+      +'<img class="aw-thumb" src="'+esc(imgSrc)+'" alt="" loading="lazy" onerror="this.style.opacity=\'.12\'"/>'
+      +'<div class="aw-body"><div class="aw-name">'+esc(a.title||'—')+'</div>'
+      +'<div class="aw-meta">'+esc(meta)+'</div>'
+      +'<div class="aw-badges">'
+      +(a.type?'<span class="bdg bdg-type">'+esc(a.type)+'</span>':'')
+      +(a.price?'<span class="bdg bdg-price">'+esc(a.price)+'</span>':'')
+      +(a.subcategory?'<span class="bdg bdg-sub">'+esc(a.subcategory)+'</span>':'')
+      +'<span class="bdg bdg-feat'+(a.featured?' on':'')+'" data-id="'+a.id+'">'+(a.featured?'★ Featured':'☆ Feature')+'</span>'
+      +'</div></div>'
+      +'<div class="aw-acts"><button class="btn-edit" data-id="'+a.id+'">Edit</button><button class="btn-del" data-id="'+a.id+'">Delete</button></div>'
+      +'</div>';
+  }).join('');
+  el.querySelectorAll('.bdg-feat').forEach(function(b){ b.addEventListener('click',function(){toggleFeatured(+b.dataset.id);}); });
+  el.querySelectorAll('.btn-edit').forEach(function(b){ b.addEventListener('click',function(){openEditPanel(+b.dataset.id);}); });
+  el.querySelectorAll('.btn-del').forEach(function(b){ b.addEventListener('click',function(){deleteWork(+b.dataset.id);}); });
+  setTimeout(refreshWInd,50);
+}
+
+function toggleFeatured(id){
+  if(!ghToken){showStatus('Save token first','err');return;}
+  showStatus('Updating…','loading');
+  loadData().then(function(result){
+    var list=result.list; var sha=result.sha;
+    var a=list.find(function(x){return x.id===id;}); if(!a) throw new Error('Not found');
+    a.featured=!a.featured;
+    var _tjson=JSON.stringify(list,null,2);
+    var content;try{content=btoa(unescape(encodeURIComponent(_tjson)));}catch(e){content=btoa(unescape(encodeURIComponent(_tjson.replace(/[\u0080-\uFFFF]/g,'?'))));}
+    var body={message:'Toggle featured: '+a.title,content:content,branch:BRANCH}; if(sha)body.sha=sha;
+    return ghFetch('PUT','artworks.json',body).then(function(){
+      showStatus(a.featured?'★ Marked as featured':'Removed from featured','ok');
+      window._aw=list;
+      renderList(list,activeLcat);
+      renderFeatSlots(); /* keep featured panel in sync */
+    });
+  }).catch(function(err){showStatus('✗ '+err.message,'err');});
+}
+
+function deleteWork(id){
+  if(!confirm('Delete this artwork permanently? This cannot be undone.')) return;
+  if(!ghToken){showStatus('Save token first','err');return;}
+  showStatus('Deleting…','loading');
+  var toDelete=null;
+  loadData().then(function(result){
+    var list=result.list; var sha=result.sha;
+    toDelete=list.find(function(x){return x.id===id;}); if(!toDelete) throw new Error('Not found');
+    var updated=list.filter(function(x){return x.id!==id;});
+    var _djson=JSON.stringify(updated,null,2);
+    var content;try{content=btoa(unescape(encodeURIComponent(_djson)));}catch(e){content=btoa(unescape(encodeURIComponent(_djson.replace(/[\u0080-\uFFFF]/g,'?'))));}
+    var body={message:'Delete: '+toDelete.title,content:content,branch:BRANCH}; if(sha)body.sha=sha;
+    return ghFetch('PUT','artworks.json',body).then(function(){return updated;});
+  }).then(function(updated){
+    /* update UI immediately — don't wait for image deletion */
+    showStatus('✓ Deleted','ok'); window._aw=updated; renderList(updated,activeLcat);
+    /* delete image file in background */
+    if(toDelete&&toDelete.image){
+      ghFetch('GET',toDelete.image).then(function(f){
+        if(f&&f.sha) return ghFetch('DELETE',toDelete.image,{message:'Delete image',sha:f.sha,branch:BRANCH});
+      }).catch(function(){/* image delete failure is non-critical */});
+    }
+  }).catch(function(err){showStatus('✗ '+err.message,'err');});
+}
+
+/* ── FEATURED PICKER ── */
+var pickerSlot = 1;
+var featuredIds = {1: null, 2: null};
+/* feat slot tap/click — addEventListener is more reliable than onclick on mobile */
+
+(function(){
+  var s1=document.getElementById('featSlot1');
+  var s2=document.getElementById('featSlot2');
+  if(s1) s1.addEventListener('click',function(e){e.stopPropagation();openPicker(1);});
+  if(s2) s2.addEventListener('click',function(e){e.stopPropagation();openPicker(2);});
+})();
+
+function loadFeaturedPanel(){
+  /* Try localStorage first for last explicitly saved selection */
+  var saved = localStorage.getItem('st117_featured');
+  if(saved){ try{featuredIds=JSON.parse(saved);}catch(e){} }
+  /* If _aw is loaded, also sync from artworks.json featured:true flags */
+  syncFeaturedFromAW();
+  renderFeatSlots();
+}
+function syncFeaturedFromAW(){
+  if(!window._aw) return;
+  var feats=window._aw.filter(function(x){return x.featured;});
+  /* Only override localStorage if artworks.json has featured items and localStorage is empty */
+  if(feats.length && !featuredIds[1] && !featuredIds[2]){
+    if(feats[0]) featuredIds[1]=feats[0].id;
+    if(feats[1]) featuredIds[2]=feats[1].id;
+  }
+}
+function renderFeatSlots(){
+  [1,2].forEach(function(n){
+    var slot = document.getElementById('featSlot'+n);
+    if(!slot) return; /* panel may not be visible yet */
+    var id   = featuredIds[n];
+    var a    = id && window._aw ? window._aw.find(function(x){return x.id===id;}) : null;
+    /* clear old img */
+    var oldImg = slot.querySelector('img.feat-img');
+    if(oldImg) oldImg.remove();
+    slot.classList.remove('filled');
+    document.getElementById('feat'+n+'Title').textContent='';
+    if(a){
+      var img=document.createElement('img');
+      img.className='feat-img';
+      img.src=rawStable(a.image);
+      img.alt=a.title;
+      img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
+      slot.insertBefore(img,slot.firstChild);
+      slot.classList.add('filled');
+      document.getElementById('feat'+n+'Title').textContent=a.title||'';
+    }
+  });
+}
+
+window.openPicker = function(slot){
+  pickerSlot = slot;
+  var list = window._aw||[];
+  var grid = document.getElementById('pickerGrid');
+  var _pm=document.getElementById('pickerModal');
+  if(_pm) _pm.classList.add('open');
+  document.body.style.overflow='hidden';
+  if(!list.length){
+    if(!ghToken){
+      grid.innerHTML='<div class="pm-empty">Save your GitHub token first, then reload.</div>';
+      return;
+    }
+    grid.innerHTML='<div class="pm-empty">Loading…</div>';
+    loadData().then(function(result){
+      window._aw=result.list;
+      renderList(result.list,activeLcat);
+      window.openPicker(slot); /* retry now that data is loaded */
+      var _pmr=document.getElementById('pickerModal'); if(_pmr)_pmr.classList.remove('open');
+    }).catch(function(){
+      grid.innerHTML='<div class="pm-empty">Could not load artworks — check token.</div>';
+    });
+    return;
+  }
+  grid.innerHTML=list.map(function(a){
+      var meta=[a.type,a.year].filter(Boolean).join(' · ');
+      return'<div class="pm-item" data-id="'+a.id+'">'
+        +'<img src="'+esc(rawStable(a.image))+'" alt="'+esc(a.title)+'" loading="lazy"/>'
+        +'<div class="pm-item-lbl"><div class="pm-item-t">'+esc(a.title)+'</div>'+(meta?'<div class="pm-item-m">'+esc(meta)+'</div>':'')+'</div>'
+        +'</div>';
+    }).join('');
+    grid.querySelectorAll('.pm-item').forEach(function(item){
+      item.addEventListener('click',function(){
+        featuredIds[pickerSlot]=+item.dataset.id;
+        var _pmc=document.getElementById('pickerModal'); if(_pmc)_pmc.classList.remove('open');
+        document.body.style.overflow='';
+        renderFeatSlots();
+      });
+    });
+};
+
+var _pc=document.getElementById('pickerClose'); if(_pc) _pc.addEventListener('click',function(){
+  var _pm=document.getElementById('pickerModal');if(_pm)_pm.classList.remove('open');
+  document.body.style.overflow='';
+});
+
+/* save featured — pushes featured:true onto those 2 artworks in artworks.json */
+var _sfb=document.getElementById('saveFeatBtn'); if(_sfb) _sfb.addEventListener('click', function(){
+  if(!ghToken){showStatus('Save your GitHub token first','err');return;}
+  var id1=featuredIds[1], id2=featuredIds[2];
+  if(!id1&&!id2){showStatus('Choose at least 1 featured work first','err');return;}
+  showStatus('Saving featured works…','loading');
+  /* save IDs to localStorage so index can use them */
+  localStorage.setItem('st117_featured', JSON.stringify(featuredIds));
+  /* update artworks.json — mark selected as featured, others as not */
+  loadData().then(function(result){
+    var list=result.list; var sha=result.sha;
+    list.forEach(function(a){ a.featured=(a.id===id1||a.id===id2); });
+    var _fjson=JSON.stringify(list,null,2);
+    var content;try{content=btoa(unescape(encodeURIComponent(_fjson)));}catch(e){content=btoa(unescape(encodeURIComponent(_fjson.replace(/[\u0080-\uFFFF]/g,'?'))));}
+    var body={message:'Update featured works',content:content,branch:BRANCH}; if(sha)body.sha=sha;
+    return ghFetch('PUT','artworks.json',body).then(function(){return list;});
+  }).then(function(list){
+    window._aw=list; showStatus('✓ Featured works saved! Site updates in ~1 minute.','ok');
+    renderFeatSlots();
+  }).catch(function(err){showStatus('✗ '+err.message,'err');});
+});
+
+/* ── ARTISTS ── */
+function loadArtistPanel(){
+  var data={}; try{var s=localStorage.getItem('st117_artists');if(s)data=JSON.parse(s);}catch(e){}
+  if(data.a1name)document.getElementById('a1name').value=data.a1name;
+  if(data.a1role)document.getElementById('a1role').value=data.a1role;
+  if(data.a1bio)document.getElementById('a1bio').value=data.a1bio;
+  if(data.a2name)document.getElementById('a2name').value=data.a2name;
+  if(data.a2role)document.getElementById('a2role').value=data.a2role;
+  if(data.a2bio)document.getElementById('a2bio').value=data.a2bio;
+  loadAPhoto('st117_photo1','aImg1','aPrev1');
+  loadAPhoto('st117_photo2','aImg2','aPrev2');
+}
+function loadAPhoto(key,imgId,boxId){
+  var s=localStorage.getItem(key);
+  if(s){var img=document.getElementById(imgId);if(img){img.src=s;img.style.display='block';}
+    var box=document.getElementById(boxId);if(box){var ph=box.querySelector('.ae-ph-lbl');if(ph)ph.style.display='none';}}
+}
+function saveArtist(n){
+  var name=document.getElementById('a'+n+'name').value.trim();
+  if(!name){showStatus('Enter artist name','err');return;}
+  var data={};try{var s=localStorage.getItem('st117_artists');if(s)data=JSON.parse(s);}catch(e){}
+  data['a'+n+'name']=name;
+  data['a'+n+'role']=document.getElementById('a'+n+'role').value.trim();
+  data['a'+n+'bio']=document.getElementById('a'+n+'bio').value.trim();
+  localStorage.setItem('st117_artists',JSON.stringify(data));
+  showStatus('✓ Artist '+n+' saved — refresh the main site to see changes','ok');
+}
+var _sa1=document.getElementById('saveArtist1Btn');if(_sa1)_sa1.addEventListener('click',function(){saveArtist(1);});
+var _sa2=document.getElementById('saveArtist2Btn');if(_sa2)_sa2.addEventListener('click',function(){saveArtist(2);});
+var _ap1=document.getElementById('aPhoto1'); if(_ap1) _ap1.addEventListener('change',function(){
+  var f=this.files[0];if(!f)return;
+  var r1=new FileReader();r1.onload=function(e){localStorage.setItem('st117_photo1',e.target.result);loadAPhoto('st117_photo1','aImg1','aPrev1');showStatus('✓ Artist 1 photo saved','ok');};r1.readAsDataURL(f);
+});
+var _ap2=document.getElementById('aPhoto2'); if(_ap2) _ap2.addEventListener('change',function(){
+  var f=this.files[0];if(!f)return;
+  var r2=new FileReader();r2.onload=function(e){localStorage.setItem('st117_photo2',e.target.result);loadAPhoto('st117_photo2','aImg2','aPrev2');showStatus('✓ Artist 2 photo saved','ok');};r2.readAsDataURL(f);
+});
+
+/* ── INIT ── */
+function initApp(){
+  switchPanel('upload');
+  updateTokenStatus(); /* now safe — app is visible */
+  loadArtistPanel();
+  loadData().then(function(result){
+    window._aw=result.list;
+    renderList(result.list,'all');
+    loadFeaturedPanel(); /* load after _aw so sync works */
+  }).catch(function(err){
+    console.error('[ST117 Admin]',err);
+    var el=document.getElementById('awList');
+    if(el)el.innerHTML='<div class="list-empty"><div class="ei">⚠</div><p>Could not load artworks.<br>Check your GitHub Token in the sidebar.</p></div>';
+    loadFeaturedPanel(); /* still try to load featured panel from localStorage */
+  });
+}
+
+})();
+</script>
+
+</body>
+</html>

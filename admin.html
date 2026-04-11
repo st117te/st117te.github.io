@@ -724,8 +724,8 @@ var REPO  = 'st117te.github.io';
 var BRANCH = 'main';
 var PASSWORD = 'Tetova357357';
 
-/* ── DEFAULT TOKEN — paste your ghp_ token here once, it will always be used ── */
-var DEFAULT_TOKEN = atob('Z2hwX3B3cDBjSUtaNm03Z0tNQ2ZRR3VpcHM0cXBmUG05YzBsUURjSw==');
+/* ── TOKEN — stored in browser localStorage only, never in code ── */
+var DEFAULT_TOKEN = '';
 
 var CAT_MATCH = {
   paintings:   ['painting','paintings','mixed media','tempera'],
@@ -1441,7 +1441,13 @@ function initApp(){
   var _gti=document.getElementById('ghTokenInput');
   if(_gti&&ghToken) _gti.value=ghToken;
   updateTokenStatus();
-  switchPanel('upload');
+  /* if no token — go straight to token panel */
+  if(!ghToken){
+    switchPanel('token');
+    showStatus('Welcome! Paste your GitHub token below to get started.','loading');
+  } else {
+    switchPanel('upload');
+  }
   loadArtistPanel();
   loadData().then(function(result){
     window._aw=result.list;

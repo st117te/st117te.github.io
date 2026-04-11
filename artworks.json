@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "id": 1775875705087,
+    "image": "images/test-1775875700721.jpg",
+    "title": "test",
+    "type": "Photography",
+    "subcategory": "Landscape",
+    "description": "test",
+    "size": "",
+    "year": "",
+    "price": "",
+    "featured": false,
+    "date": "2026-04-11T02:48:25.088Z"
+  }
+]

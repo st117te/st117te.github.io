@@ -518,7 +518,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
       <!-- Token warning — shows if no token saved -->
       <div id="tokenWarn" style="display:none;align-items:center;gap:.8rem;background:rgba(200,16,46,.08);border:1px solid rgba(200,16,46,.18);border-radius:8px;padding:.75rem 1.1rem;margin:.8rem 1.4rem 0;font-size:.72rem;color:rgba(200,16,46,.85);">
         <span>⚠</span>
-        <span>No GitHub token saved — <button id="tokenWarnBtn" style="background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;font-size:.72rem;text-decoration:underline;padding:0;">set it here</button> before publishing.</span>
+        <span>No GitHub token saved — <button onclick="switchPanel('token')" style="background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;font-size:.72rem;text-decoration:underline;padding:0;">set it here</button> before publishing.</span>
       </div>
 
       <!-- PUBLISH -->
@@ -641,7 +641,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
         <div class="artists-grid">
           <div class="ae-card">
             <h3><span class="an">01</span> First Artist</h3>
-            <div class="ae-photo" id="aPrev1" onclick="document.getElementById('aPhoto1').click()">
+            <div class="ae-photo" id="aPrev1" onclick="document.querySelector('.aPhoto1In').click()">
               <span class="ae-ph-lbl">[ Portrait ]</span>
               <img id="aImg1" src="" alt=""/>
               <div class="ae-ph-ov"><span>Change Photo</span></div>
@@ -658,7 +658,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
           </div>
           <div class="ae-card">
             <h3><span class="an">02</span> Second Artist</h3>
-            <div class="ae-photo" id="aPrev2" onclick="document.getElementById('aPhoto2').click()">
+            <div class="ae-photo" id="aPrev2" onclick="document.querySelector('.aPhoto2In').click()">
               <span class="ae-ph-lbl">[ Portrait ]</span>
               <img id="aImg2" src="" alt=""/>
               <div class="ae-ph-ov"><span>Change Photo</span></div>
@@ -686,7 +686,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
           <div class="tok-row">
             <div style="position:relative;flex:1;">
               <input class="tok-inp" type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%;padding-right:2.5rem;"/>
-              <button id="toggleTokenView" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink-soft);font-size:.7rem;padding:.2rem;">👁</button>
+              <button onclick="var i=document.getElementById('ghTokenInput');i.type=i.type==='password'?'text':'password';" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink-soft);font-size:.7rem;padding:.2rem;">👁</button>
             </div>
             <button class="btn-save-tok" id="saveTokenBtn">Save</button>
             <button id="testTokenBtn" style="background:none;border:1px solid var(--glass-bdr);color:var(--ink-soft);font-family:'DM Sans',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.78rem 1rem;border-radius:var(--rad-btn);cursor:pointer;white-space:nowrap;transition:all .2s;">Test</button>
@@ -724,8 +724,8 @@ var REPO  = 'st117te.github.io';
 var BRANCH = 'main';
 var PASSWORD = 'Tetova357357';
 
-/* ── TOKEN — stored in browser localStorage only, never in code ── */
-var DEFAULT_TOKEN = '';
+/* ── DEFAULT TOKEN — paste your ghp_ token here once, it will always be used ── */
+var DEFAULT_TOKEN = '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'; /* <-- paste your token between these quotes */
 
 var CAT_MATCH = {
   paintings:   ['painting','paintings','mixed media','tempera'],
@@ -752,9 +752,6 @@ function rawUrl(p){
 }
 function rawStable(p){ return 'https://'+OWNER+'.github.io/'+p; }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-/* ── TOKEN INIT — set variable early, DOM update happens in initApp ── */
-/* (Already loaded above — ghToken is set) */
 
 /* ── AUTH ── */
 if(sessionStorage.getItem('st117_auth')==='1') unlock();
@@ -839,19 +836,17 @@ var _wt=document.getElementById('worksTabs'); (_wt?_wt.querySelectorAll('.w-tab'
 window.addEventListener('resize', function(){ if(document.getElementById('worksTabs')) refreshWInd(); }, {passive:true});
 
 /* ── GITHUB TOKEN ── */
+/* ── GITHUB TOKEN — load from localStorage, fall back to DEFAULT_TOKEN ── */
 var ghToken = localStorage.getItem('st117_token') || DEFAULT_TOKEN || '';
 /* If DEFAULT_TOKEN is set and nothing in localStorage yet, save it automatically */
 if(DEFAULT_TOKEN && !localStorage.getItem('st117_token')){
   localStorage.setItem('st117_token', DEFAULT_TOKEN);
 }
-/* token input filled in initApp() after app is visible */
-var _ttv=document.getElementById('toggleTokenView');
-if(_ttv)_ttv.addEventListener('click',function(){
-  var i=document.getElementById('ghTokenInput');
-  if(i)i.type=i.type==='password'?'text':'password';
-});
-var _twb=document.getElementById('tokenWarnBtn');
-if(_twb) _twb.addEventListener('click',function(){switchPanel('token');});
+if(ghToken){
+  var _gti=document.getElementById('ghTokenInput');
+  if(_gti) _gti.value=ghToken;
+  /* updateTokenStatus called in initApp after app is visible */
+}
 var _ttb=document.getElementById('testTokenBtn'); if(_ttb) _ttb.addEventListener('click', function(){
   var v=document.getElementById('ghTokenInput').value.trim();
   if(!v){showStatus('Enter a token first','err');return;}
@@ -1017,7 +1012,7 @@ function resetForm(){
 
 /* ── PUBLISH ── */
 var _pb=document.getElementById('publishBtn'); if(_pb) _pb.addEventListener('click', function(){
-  if(!ghToken){ showStatus('⚠ No token — go to GitHub Token in sidebar','err'); return; }
+  if(!ghToken){ showStatus('⚠ No token — click GitHub Token in sidebar first','err'); switchPanel('token'); return; }
   var title = document.getElementById('fTitle').value.trim();
   if(!title){ showStatus('Enter a title','err'); return; }
 
@@ -1437,17 +1432,8 @@ var _ap2=document.getElementById('aPhoto2'); if(_ap2) _ap2.addEventListener('cha
 
 /* ── INIT ── */
 function initApp(){
-  /* fill token input now that app is visible */
-  var _gti=document.getElementById('ghTokenInput');
-  if(_gti&&ghToken) _gti.value=ghToken;
-  updateTokenStatus();
-  /* if no token — go straight to token panel */
-  if(!ghToken){
-    switchPanel('token');
-    showStatus('Welcome! Paste your GitHub token below to get started.','loading');
-  } else {
-    switchPanel('upload');
-  }
+  switchPanel('upload');
+  updateTokenStatus(); /* now safe — app is visible */
   loadArtistPanel();
   loadData().then(function(result){
     window._aw=result.list;

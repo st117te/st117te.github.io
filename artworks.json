@@ -11,18 +11,5 @@
     "price": "",
     "featured": false,
     "date": "2026-04-11T03:32:49.588Z"
-  },
-  {
-    "id": 1775878253583,
-    "image": "images/test-1775878251272.jpg",
-    "title": "test",
-    "type": "",
-    "subcategory": "",
-    "description": "test",
-    "size": "",
-    "year": "",
-    "price": "100",
-    "featured": false,
-    "date": "2026-04-11T03:30:53.584Z"
   }
 ]

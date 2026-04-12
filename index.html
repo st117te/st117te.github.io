@@ -2107,7 +2107,7 @@ footer{padding:7rem 5vw 3.5rem;border-top:1px solid var(--glass-bdr);
       <span>or leave a message</span>
     </div>
 
-    <div id="cformWrap" class="reveal">
+    <div id="cformWrap">
       <div class="contact-grid">
         <input class="cf-field" type="text" id="cN" placeholder="Full Name" autocomplete="name"/>
         <input class="cf-field" type="email" id="cE" placeholder="Email Address" autocomplete="email"/>
@@ -2435,15 +2435,13 @@ if(_dtMobile) _dtMobile.addEventListener('click',function(){
   var isL=root.classList.contains('light');
   localStorage.setItem('st117_light',isL?'1':'0');
   applyThemeIcons();
-  /* sync drawer moon/sun icons */
   var dm=_dtMobile.querySelector('.tog-moon');
   var ds=_dtMobile.querySelector('.tog-sun');
   if(dm)dm.style.display=isL?'none':'block';
   if(ds)ds.style.display=isL?'block':'none';
   setTimeout(updateTabInd,60);
   /* sync the icon in the drawer toggle */
-  var btn=document.getElementById('darkToggleMobile');
-  if(btn){btn.querySelector('.tog-moon').style.display=isL?'none':'block';btn.querySelector('.tog-sun').style.display=isL?'block':'none';}
+
 });
 /* sync drawer toggle icon on load */
 (function(){
@@ -2486,7 +2484,7 @@ document.querySelectorAll('.reveal').forEach(function(el){revObs.observe(el);});
 /* Fallback: if observer doesn't fire (old Android WebView), reveal all after 1.5s */
 setTimeout(function(){
   document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});
-},1500);
+},800);
 /* Re-check on resize — content may reflow */
 window.addEventListener('resize',function(){
   document.querySelectorAll('.reveal:not(.visible)').forEach(function(el){
@@ -2510,6 +2508,8 @@ function updateTabInd(){
   ind.style.width=ar.width+'px';
   ind.style.left=(ar.left-tr.left)+'px';
 }
+setTimeout(updateTabInd,100);
+setTimeout(updateTabInd,800);
 setTimeout(updateTabInd,2500);
 window.addEventListener('resize',updateTabInd,{passive:true});
 
@@ -2553,7 +2553,7 @@ buildSubChips('paintings');
 
 /* ── LOAD ARTWORKS ── */
 function loadAW(cb){
-  /* URL list — tried in order until one succeeds */
+  /* 3-URL fallback: GitHub Pages → relative → raw CDN */
   var urls=[
     /* 1. GitHub Pages direct — same domain, no CORS, works on iOS */
     'https://'+OWNER+'.github.io/artworks.json?_='+Date.now(),
@@ -3259,10 +3259,12 @@ window.sendMsg=function sendMsg(){
   var e=document.getElementById('cE').value.trim();
   var m=document.getElementById('cM').value.trim();
   if(!n){document.getElementById('cN').focus();return;}
-  if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){document.getElementById('cE').focus();return;}
+  if(!e||!/^[^s@]+@[^s@]+.[^s@]+$/.test(e)){document.getElementById('cE').focus();return;}
   if(!m){document.getElementById('cM').focus();return;}
-  document.getElementById('cformWrap').style.display='none';
-  document.getElementById('fOk').classList.add('show');
+  var fw=document.getElementById('cformWrap');
+  var ok=document.getElementById('fOk');
+  if(fw){fw.style.display='none';fw.style.opacity='0';}
+  if(ok){ok.classList.add('show');ok.style.opacity='1';}
 }
 
 /* ── INIT ── */

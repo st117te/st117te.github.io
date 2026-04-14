@@ -96,6 +96,10 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 .nav-item.active{background:var(--red-a);color:var(--red);}
 .nav-item.active svg{opacity:1;}
 .sb-div{height:1px;background:var(--glass-bdr);margin:.7rem 1.4rem;}
+.sb-stat{font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-soft);background:var(--bg3);border:1px solid var(--glass-bdr);
+  border-radius:4px;padding:.2rem .55rem;}
+.sb-stat span{color:var(--ink);margin-left:.25rem;}
 
 /* CONTENT */
 .content{flex:1;overflow-y:auto;background:var(--bg);}
@@ -482,6 +486,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
       <div class="sb-brand">
         <div class="sb-name bf">ST<span class="num">117</span></div>
         <div class="sb-tag">Visual Art Studio<br>North Macedonia</div>
+      <div class="sb-stats" id="sbStats" style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;"></div>
       </div>
       <div class="sb-div"></div>
       <div class="sb-sec">
@@ -600,7 +605,10 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 
       <!-- ALL WORKS -->
       <div class="panel" id="panel-works">
-        <div class="ph"><h1>All Works</h1><p>Manage, feature and delete published artworks.</p></div>
+        <div class="ph"><h1>All Works</h1><p>Manage, feature and delete published artworks. <span id="totalWorksNote" style="color:var(--ink-soft);"></span></p></div>
+        <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;flex-wrap:wrap;">
+          <input id="awSearch" type="text" placeholder="Search artworks…" style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--glass-bdr);border-radius:var(--rad-btn);padding:.6rem 1rem;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);outline:none;transition:border-color .2s;" oninput="filterWorks(this.value)"/>
+        </div>
         <div class="list-ctrl">
           <span class="cnt-badge" id="listCount">0 artworks</span>
           <div class="works-tabs" id="worksTabs">
@@ -611,6 +619,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
             <button class="w-tab" data-lcat="photography">Photography</button>
             <button class="w-tab" data-lcat="printmaking">Printmaking</button>
           </div>
+        </div>
         </div>
         <div class="works-list" id="awList"></div>
       </div>
@@ -841,6 +850,7 @@ var _wt=$('worksTabs');
     document.querySelectorAll('.w-tab').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active'); activeLcat=btn.dataset.lcat;
     setTimeout(refreshWInd,20);
+    var srch=$('awSearch');if(srch)srch.value='';
     if(window._aw) renderList(window._aw,activeLcat);
   });
 });
@@ -1170,6 +1180,24 @@ function saveEditedWork(id,title){
   } else { doSave(null); }
 }
 
+
+/* ── SIDEBAR STATS ── */
+function updateSbStats(list){
+  var el=document.getElementById('sbStats'); if(!el) return;
+  var total=list.length;
+  var cats={paintings:0,drawings:0,photography:0,printmaking:0};
+  list.forEach(function(a){
+    Object.keys(CAT_MATCH).forEach(function(cat){
+      if(CAT_MATCH[cat].some(function(m){return(a.type||'').toLowerCase().indexOf(m)!==-1;}))
+        cats[cat]=(cats[cat]||0)+1;
+    });
+  });
+  el.innerHTML='<div class="sb-stat">Total<span>'+total+'</span></div>'
+    +Object.keys(cats).filter(function(k){return cats[k]>0;}).map(function(k){
+      return '<div class="sb-stat">'+k.charAt(0).toUpperCase()+k.slice(1,4)+'<span>'+cats[k]+'</span></div>';
+    }).join('');
+}
+
 /* ═══════════════════════════════════════
    WORKS LIST
 ═══════════════════════════════════════ */
@@ -1178,6 +1206,8 @@ function renderList(list,cat){
   window._aw=list;
   var filtered=list.filter(function(a){return catMatchA(a,cat);});
   var lc=$('listCount'); if(lc) lc.textContent=filtered.length+' artwork'+(filtered.length!==1?'s':'');
+  var tn=$('totalWorksNote');if(tn&&list.length>0)tn.textContent='('+list.length+' total)';
+  updateSbStats(list);
   var el=$('awList'); if(!el) return;
   if(!filtered.length){
     el.innerHTML='<div class="list-empty"><div class="ei">—</div><p>No artworks yet.<br>Publish your first one.</p></div>';
@@ -1197,7 +1227,7 @@ function renderList(list,cat){
       +(a.subcategory?'<span class="bdg bdg-sub">'+esc(a.subcategory)+'</span>':'')
       +'<span class="bdg bdg-feat'+(a.featured?' on':'')+'" data-id="'+a.id+'">'+( a.featured?'&#9733; Featured':'&#9734; Feature')+'</span>'
       +'</div></div>'
-      +'<div class="aw-acts"><button class="btn-edit" data-id="'+a.id+'">Edit</button><button class="btn-del" data-id="'+a.id+'">Delete</button></div>'
+      +'<div class="aw-acts"><a class="btn-edit" href="https://'+OWNER+'.github.io" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Site</a><button class="btn-edit" data-id="'+a.id+'">Edit</button><button class="btn-del" data-id="'+a.id+'">Delete</button></div>'
       +'</div>';
   }).join('');
       +'<span class="bdg bdg-feat'+(a.featured?' on':'')+'" data-id="'+a.id+'">'+( a.featured?'&#9733; Featured':'&#9734; Feature')+'</span>'
@@ -1341,6 +1371,29 @@ if(_sf) _sf.addEventListener('click',function(){
     window._aw=list; showStatus('✓ Featured works saved!','ok'); renderFeatSlots();
   }).catch(function(err){showStatus('✗ '+err.message,'err');});
 });
+
+
+/* ── WORKS SEARCH ── */
+window.filterWorks=function(q){
+  var list=window._aw||[];
+  if(!q.trim()){renderList(list,activeLcat);return;}
+  var ql=q.toLowerCase();
+  var filtered=list.filter(function(a){
+    return (a.title||'').toLowerCase().indexOf(ql)!==-1
+      ||(a.type||'').toLowerCase().indexOf(ql)!==-1
+      ||(a.description||'').toLowerCase().indexOf(ql)!==-1
+      ||(a.year||'').indexOf(ql)!==-1;
+  });
+  window._aw=list; // preserve full list
+  var lc=$('listCount'); if(lc) lc.textContent=filtered.length+' result'+(filtered.length!==1?'s':'');
+  var el=$('awList'); if(!el) return;
+  if(!filtered.length){el.innerHTML='<div class="list-empty"><div class="ei">—</div><p>No artworks match "'+esc(q)+'"</p></div>';return;}
+  // reuse renderList logic but with filtered
+  var saved=window._aw;
+  window._aw=filtered;
+  renderList(filtered,'all');
+  window._aw=saved;
+};
 
 /* ═══════════════════════════════════════
    ARTISTS

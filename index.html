@@ -3028,6 +3028,7 @@ function lbPreload(idx){
 }
 
 function openLb(list,idx){
+  if(!list||!list.length)return; /* nothing to show — don't open blank */
   lbList=list;
   lbIdx=Math.max(0,Math.min(idx,list.length-1));
   lbZoomed=false;lbDir=1;lbPanX=50;lbPanY=50;
@@ -3049,7 +3050,11 @@ function openLb(list,idx){
 
 function showLbItem(animate){
   var a=lbList[lbIdx];
-  if(!a)return;
+  if(!a){
+    /* invalid index or empty list — don't leave a blank overlay, close it */
+    closeLb();
+    return;
+  }
 
   /* reset zoom */
   lbZoomed=false;lbPanX=50;lbPanY=50;

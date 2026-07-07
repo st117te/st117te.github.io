@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>ST117 — Admin Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -53,7 +53,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 #app.on{display:flex;flex-direction:column;}
 
 /* TOPBAR */
-.topbar{height:58px;padding:0 1.8rem;flex-shrink:0;display:flex;align-items:center;
+.topbar{height:58px;padding:0 1.8rem;padding-left:max(1.8rem,env(safe-area-inset-left));padding-right:max(1.8rem,env(safe-area-inset-right));flex-shrink:0;display:flex;align-items:center;
   justify-content:space-between;border-bottom:1px solid var(--glass-bdr);
   background:var(--bg);position:sticky;top:0;z-index:300;}
 .tb-logo{font-size:1.05rem;letter-spacing:-.05em;color:var(--ink);}
@@ -74,7 +74,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
   -webkit-tap-highlight-color:transparent;}
 
 /* BODY */
-.app-body{display:flex;flex:1;overflow:hidden;height:calc(100vh - 58px);}
+.app-body{display:flex;flex:1;overflow:hidden;height:calc(100vh - 58px);height:calc(100svh - 58px);}
 
 /* SIDEBAR */
 .sidebar{width:252px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--glass-bdr);
@@ -92,10 +92,14 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
   -webkit-tap-highlight-color:transparent;}
 .nav-item svg{flex-shrink:0;opacity:.5;transition:opacity .18s;}
 .nav-item:hover{background:var(--bg3);color:var(--ink);}
-.nav-item:hover svg{opacity:.8;}
+.nav-item:hover svg,.nav-item.active svg{opacity:.8;}
 .nav-item.active{background:var(--red-a);color:var(--red);}
 .nav-item.active svg{opacity:1;}
 .sb-div{height:1px;background:var(--glass-bdr);margin:.7rem 1.4rem;}
+.sb-stat{font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-soft);background:var(--bg3);border:1px solid var(--glass-bdr);
+  border-radius:4px;padding:.2rem .55rem;}
+.sb-stat span{color:var(--ink);margin-left:.25rem;}
 
 /* CONTENT */
 .content{flex:1;overflow-y:auto;background:var(--bg);}
@@ -107,7 +111,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 .ph p{font-size:.82rem;color:var(--ink-soft);line-height:1.6;}
 
 /* STATUS */
-#statusWrap{padding:1.2rem 2.8rem 0;}
+#statusWrap{padding:1rem 2.8rem 0;position:sticky;top:0;z-index:10;background:var(--bg);}
 .status{padding:.8rem 1.1rem;font-size:.58rem;font-weight:700;letter-spacing:.16em;
   text-transform:uppercase;margin-bottom:1.5rem;display:none;border-radius:var(--rad-btn);}
 .status.ok{background:var(--green-a);color:var(--green);border:1px solid rgba(34,197,94,.15);display:block;}
@@ -126,6 +130,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 
 /* DROP ZONE */
 .drop-zone{border:2px dashed rgba(255,255,255,.1);border-radius:var(--rad);padding:2.5rem 1.5rem;
+  position:relative;/* needed for the overlaid file input */
   text-align:center;cursor:pointer;transition:border-color .25s,background .25s;background:var(--bg3);margin-bottom:1.3rem;}
 .drop-zone:hover,.drop-zone.over{border-color:var(--red);background:var(--red-a);}
 .drop-prev{width:100%;max-height:200px;object-fit:contain;display:none;margin-bottom:.7rem;border-radius:var(--rad-btn);}
@@ -134,7 +139,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 .drop-hint{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);}
 .drop-hint strong{color:var(--red);}
 .drop-fname{font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--green);display:none;margin-bottom:.3rem;}
-#fileInput{display:none;}
+/* #fileInput visibility handled by inline style (opacity:0, position:absolute) */
 
 /* FORM FIELDS */
 .field{margin-bottom:1.3rem;}
@@ -149,8 +154,8 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 .field textarea.tall{min-height:110px;}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;}
 .price-label{color:rgba(200,16,46,.8) !important;}
-.price-field input{border-color:rgba(200,16,46,.2);color:var(--red);}
-.price-field input:focus{border-color:var(--red);}
+.price-field{border-color:rgba(200,16,46,.2) !important;color:var(--red) !important;}
+.price-field:focus{border-color:var(--red) !important;}
 #subcatWrap{display:none;}
 
 /* TOGGLE */
@@ -216,6 +221,11 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 .bdg-feat:hover{border-color:var(--red);color:var(--red);}
 .bdg-feat.on{color:var(--red);border-color:rgba(200,16,46,.28);background:var(--red-a);}
 .aw-acts{display:flex;flex-direction:column;gap:.35rem;flex-shrink:0;}
+.aw-acts a.btn-edit{text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+.btn-edit{background:none;border:1px solid var(--glass-bdr);color:var(--ink-soft);
+  font-family:'DM Sans',sans-serif;font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.42rem .85rem;border-radius:var(--rad-btn);cursor:pointer;transition:background .18s,border-color .18s,color .18s;white-space:nowrap;}
+.btn-edit:hover{border-color:var(--ink-soft);color:var(--ink);background:rgba(255,255,255,.05);}
 .btn-del{background:none;border:1px solid rgba(200,16,46,.18);color:var(--red);
   font-family:'DM Sans',sans-serif;font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
   padding:.42rem .85rem;border-radius:var(--rad-btn);cursor:pointer;transition:background .18s;white-space:nowrap;}
@@ -325,25 +335,201 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 /* MOBILE */
 .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:250;-webkit-tap-highlight-color:transparent;}
 .sb-overlay.show{display:block;}
+/* ── MOBILE (≤768px) ── */
 @media(max-width:768px){
+  /* Topbar */
+  .topbar{padding:0 1rem;height:54px;}
   .burger{display:flex;}
-  .sidebar{position:fixed;left:0;top:58px;bottom:0;z-index:260;transform:translateX(-100%);}
+
+  /* Sidebar: slide in from left */
+  .sidebar{
+    position:fixed;left:0;top:54px;bottom:0;z-index:260;
+    bottom:env(safe-area-inset-bottom,0);
+    transform:translateX(-110%);
+    will-change:transform;
+    transition:transform .30s cubic-bezier(0.19,1,0.22,1);
+    padding-bottom:calc(1rem + env(safe-area-inset-bottom));
+    box-shadow:8px 0 32px rgba(0,0,0,.5);
+    width:82vw;max-width:280px;
+  }
   .sidebar.open{transform:translateX(0);}
-  .panel{padding:1.4rem 1.1rem;}
-  .ph h1{font-size:1.5rem;}
-  .aw-card{grid-template-columns:56px 1fr;gap:.8rem;}
-  .aw-acts{flex-direction:row;grid-column:1/-1;}
-  .aw-thumb{width:56px;height:56px;}
-  #statusWrap{padding:.9rem 1.1rem 0;}
-  .artists-grid{grid-template-columns:1fr;}
+
+  /* Content scrolls full width */
+  .content{
+    width:100%;
+    padding-bottom:calc(2rem + env(safe-area-inset-bottom));
+  }
+  .panel{padding:1.2rem 1rem;}
+  .ph{margin-bottom:1.4rem;padding-bottom:1rem;}
+  .ph h1{font-size:1.35rem;}
+  .ph p{font-size:.78rem;}
+
+  /* Status bar */
+  #statusWrap{padding:.6rem 1rem 0;}
+  .status{font-size:.56rem;padding:.75rem 1rem;}
+
+  /* Upload: single col */
+  .upload-grid{grid-template-columns:1fr;}
+  .drop-zone{padding:2rem 1rem;}
+
+  /* Form fields */
   .field-row{grid-template-columns:1fr;}
-  .pm-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+  .field{margin-bottom:1.1rem;}
+  .card{padding:1.3rem;}
+  .card-ttl{font-size:.6rem;}
+
+  /* Works list */
+  .list-ctrl{flex-direction:column;align-items:stretch;gap:.7rem;}
+  .works-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .works-tabs::-webkit-scrollbar{display:none;}
+  .w-tab{flex-shrink:0;padding:.62rem .95rem;font-size:.58rem;letter-spacing:.1em;}
+  .aw-card{grid-template-columns:52px 1fr;gap:.75rem;padding:1rem;}
+  .aw-thumb{width:52px;height:52px;}
+  .aw-acts{flex-direction:row;grid-column:1/-1;gap:.3rem;}
+  .btn-edit,.btn-del{flex:1;text-align:center;padding:.5rem .4rem;font-size:.54rem;}
+  .aw-name{font-size:.9rem;}
+  .aw-meta{font-size:.56rem;}
+
+  /* Featured picker */
+  .feat-grid{grid-template-columns:1fr;}
+  .feat-slot{min-height:160px;}
+  .pm-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.7rem;padding:1rem;}
+
+  /* Artists */
+  .artists-grid{grid-template-columns:1fr;}
+  .ae-card{padding:1.3rem;}
+  .ae-photo{max-height:160px;}
+
+  /* Token */
+  .tok-row{flex-wrap:wrap;}
+  .btn-save-tok{flex:1;min-width:80px;}
+  #testTokenBtn{flex:1;min-width:60px;}
+  .tok-alert{padding:1.3rem;}
 }
+
+/* ── MOBILE SMALL (≤480px) ── */
 @media(max-width:480px){
+  .topbar{padding:0 .85rem;}
   .tb-link{display:none;}
-  .tok-row{flex-direction:column;}
-  .btn-save-tok{width:100%;}
+  .tb-logo .adm{display:none;}
+  .tb-logo .sep{display:none;}
+  .panel{padding:1rem .85rem;}
+  .card{padding:1rem;}
+  .feat-slot{min-height:140px;}
+  .pm-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.55rem;}
+  .aw-card{grid-template-columns:44px 1fr;gap:.6rem;padding:.85rem;}
+  .aw-thumb{width:44px;height:44px;border-radius:6px;}
+  .btn-publish,.btn-save-a{font-size:.62rem;padding:.95rem;}
 }
+
+/* ── TOUCH ── */
+@media(pointer:coarse){
+  .nav-item{min-height:48px;}
+  .btn-publish,.btn-save-a{min-height:52px;}
+  .btn-edit,.btn-del{min-height:42px;}
+  .w-tab{min-height:44px;}
+  .drop-zone{min-height:150px;}
+  .g-tab,.sub-chip{min-height:44px;}
+  /* prevent iOS zoom on input focus */
+  input,textarea,select{font-size:16px !important;}
+  /* toggle: easier to tap */
+  .tog-wrap{width:50px;height:28px;}
+  .tog-slider::before{width:18px;height:18px;top:5px;left:5px;}
+  .tog-wrap input:checked+.tog-slider::before{transform:translateX(22px);}
+}
+
+/* TOKEN WARN */
+#tokenWarn{
+  display:none;align-items:center;gap:.8rem;
+  background:rgba(200,16,46,.08);border:1px solid rgba(200,16,46,.18);
+  border-radius:var(--rad-btn);padding:.75rem 1.1rem;
+  margin:.8rem 1.4rem 0;
+  font-size:.72rem;color:rgba(200,16,46,.85);
+}
+#tokenWarnBtn{
+  background:none;border:none;color:var(--red);
+  font-weight:700;cursor:pointer;font-size:.72rem;
+  text-decoration:underline;padding:0;
+}
+
+/* CANCEL EDIT */
+#cancelEditBtn{
+  display:none;background:none;
+  border:1px solid var(--glass-bdr);color:var(--ink-soft);
+  font-family:'DM Sans',sans-serif;font-size:.6rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  padding:.85rem 1.4rem;border-radius:var(--rad-btn);
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+#cancelEditBtn:hover{border-color:var(--red);color:var(--red);}
+
+/* TEST TOKEN BTN */
+#testTokenBtn{
+  background:none;border:1px solid var(--glass-bdr);color:var(--ink-soft);
+  font-family:'DM Sans',sans-serif;font-size:.6rem;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:.78rem 1rem;border-radius:var(--rad-btn);
+  cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;
+}
+#testTokenBtn:hover{border-color:var(--ink-soft);color:var(--ink);}
+
+/* ARTIST CARD header number */
+.an{
+  font-size:.54rem;font-weight:700;letter-spacing:.2em;
+  color:var(--ink-soft);opacity:.45;margin-right:.3rem;
+}
+
+/* SEARCH INPUT */
+#awSearch{
+  flex:1;min-width:160px;
+  background:var(--bg2);border:1px solid var(--glass-bdr);
+  border-radius:var(--rad-btn);padding:.6rem 1rem;
+  font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);
+  outline:none;transition:border-color .22s;
+  width:100%;
+}
+#awSearch:focus{border-color:var(--red);}
+#awSearch::placeholder{color:var(--ink-soft);}
+
+/* PICKER MODAL */
+.picker-modal{
+  display:none;position:fixed;inset:0;z-index:2000;
+  background:var(--bg);flex-direction:column;
+}
+.picker-modal.open{display:flex;}
+.pm-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 1.8rem;border-bottom:1px solid var(--glass-bdr);
+  flex-shrink:0;
+}
+.pm-title{
+  font-family:'DM Serif Display',serif;font-style:italic;
+  font-size:1.25rem;font-weight:400;
+}
+.pm-close{
+  background:none;border:1px solid var(--glass-bdr);color:var(--ink-soft);
+  font-family:'DM Sans',sans-serif;font-size:.6rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  padding:.5rem 1rem;border-radius:var(--rad-btn);cursor:pointer;
+  transition:border-color .22s,color .22s;
+}
+.pm-close:hover{border-color:var(--red);color:var(--red);}
+.pm-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:.8rem;padding:1.4rem;overflow-y:auto;
+}
+.pm-item{
+  border-radius:var(--rad-btn);overflow:hidden;cursor:pointer;
+  background:var(--bg2);border:2px solid transparent;
+  transition:border-color .2s,transform .2s;
+}
+.pm-item:hover{border-color:var(--red);transform:scale(1.02);}
+.pm-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+.pm-item-lbl{padding:.5rem .6rem;}
+.pm-item-t{font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pm-item-m{font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);}
+.pm-empty{padding:3rem;text-align:center;color:var(--ink-soft);font-size:.8rem;}
 </style>
 </head>
 <body>
@@ -396,6 +582,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
       <div class="sb-brand">
         <div class="sb-name bf">ST<span class="num">117</span></div>
         <div class="sb-tag">Visual Art Studio<br>North Macedonia</div>
+      <div class="sb-stats" id="sbStats" style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;"></div>
       </div>
       <div class="sb-div"></div>
       <div class="sb-sec">
@@ -429,6 +616,11 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
     <!-- CONTENT -->
     <div class="content">
       <div id="statusWrap"><div class="status" id="statusBar"></div></div>
+      <!-- Token warning — shows if no token saved -->
+      <div id="tokenWarn">
+        <span>⚠</span>
+        <span>No GitHub token saved — <button id="tokenWarnBtn" style="background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;font-size:.72rem;text-decoration:underline;padding:0;">set it here</button> before publishing.</span>
+      </div>
 
       <!-- PUBLISH -->
       <div class="panel active" id="panel-upload">
@@ -442,9 +634,11 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
                 <span class="drop-fname" id="dropFname"></span>
                 <span class="drop-icon" id="dropIcon">🖼</span>
                 <div class="drop-main" id="dropMain">Drop image here</div>
-                <div class="drop-hint" id="dropHint">or <strong>click to browse</strong></div>
+                <div class="drop-hint" id="dropHint">or <strong>tap to browse</strong></div>
+                <!-- File input overlays the entire drop zone — works on all mobile browsers -->
+                <input type="file" id="fileInput" accept="image/*,image/jpeg,image/png,image/webp,image/heic"
+                  style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:10;font-size:16px;"/>
               </div>
-              <input type="file" id="fileInput" accept="image/*"/>
             </div>
           </div>
           <div>
@@ -455,12 +649,25 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
                 <div class="field">
                   <label>Art Type</label>
                   <select id="fType">
-                    <option value="">— Select —</option>
-                    <option value="Painting">Painting</option><option value="Drawing">Drawing</option>
-                    <option value="Photography">Photography</option><option value="Printmaking">Printmaking</option>
-                    <option value="Etching">Etching</option><option value="Linocut">Linocut</option>
-                    <option value="Screen Print">Screen Print</option><option value="Illustration">Illustration</option>
-                    <option value="Mixed Media">Mixed Media</option>
+                    <option value="">— Select type —</option>
+                    <optgroup label="Paintings">
+                      <option value="Painting">Painting</option>
+                      <option value="Mixed Media">Mixed Media</option>
+                    </optgroup>
+                    <optgroup label="Drawings">
+                      <option value="Drawing">Drawing</option>
+                      <option value="Illustration">Illustration</option>
+                      <option value="Sketch">Sketch</option>
+                    </optgroup>
+                    <optgroup label="Photography">
+                      <option value="Photography">Photography</option>
+                    </optgroup>
+                    <optgroup label="Printmaking">
+                      <option value="Printmaking">Printmaking</option>
+                      <option value="Etching">Etching</option>
+                      <option value="Linocut">Linocut</option>
+                      <option value="Screen Print">Screen Print</option>
+                    </optgroup>
                   </select>
                 </div>
                 <div class="field" id="subcatWrap"><label>Subcategory</label><select id="fSubcat"><option value="">— Select —</option></select></div>
@@ -475,7 +682,18 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
                 <div class="tog-info"><div class="t-lbl">Feature on homepage</div><div class="t-desc">Show in Featured section</div></div>
                 <div class="tog-wrap"><input type="checkbox" id="fFeatured"/><div class="tog-slider"></div></div>
               </div>
-              <button class="btn-publish" id="publishBtn">Publish Artwork →</button>
+              <div class="field" id="qualityWrap">
+                <label>Image Quality</label>
+                <select id="fQuality">
+                  <option value="lossless">Lossless — original quality, larger file</option>
+                  <option value="high" selected>High — 90% quality, excellent &amp; fast</option>
+                  <option value="balanced">Balanced — 80% quality, best web speed</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;">
+                <button class="btn-publish" id="publishBtn">Publish Artwork →</button>
+                <button id="cancelEditBtn">Cancel Edit</button>
+              </div>
             </div>
           </div>
         </div>
@@ -483,7 +701,10 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 
       <!-- ALL WORKS -->
       <div class="panel" id="panel-works">
-        <div class="ph"><h1>All Works</h1><p>Manage, feature and delete published artworks.</p></div>
+        <div class="ph"><h1>All Works</h1><p>Manage, feature and delete published artworks. <span id="totalWorksNote" style="color:var(--ink-soft);"></span></p></div>
+        <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;flex-wrap:wrap;">
+          <input id="awSearch" type="text" placeholder="Search artworks…"/>
+        </div>
         <div class="list-ctrl">
           <span class="cnt-badge" id="listCount">0 artworks</span>
           <div class="works-tabs" id="worksTabs">
@@ -502,13 +723,13 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
       <div class="panel" id="panel-featured">
         <div class="ph"><h1>Featured Works</h1><p>Choose exactly 2 artworks to spotlight on the homepage. Click a slot to pick from your published works.</p></div>
         <div class="feat-grid">
-          <div class="feat-slot" id="featSlot1" onclick="openPicker(1)">
+          <div class="feat-slot" id="featSlot1">
             <span class="feat-slot-lbl">Featured 1</span>
             <div class="feat-ph-icon">—</div>
             <div class="feat-ph-txt">Click to choose</div>
             <div class="feat-slot-ov"><div class="fs-title" id="feat1Title"></div><div class="fs-change">Click to change</div></div>
           </div>
-          <div class="feat-slot" id="featSlot2" onclick="openPicker(2)">
+          <div class="feat-slot" id="featSlot2">
             <span class="feat-slot-lbl">Featured 2</span>
             <div class="feat-ph-icon">—</div>
             <div class="feat-ph-txt">Click to choose</div>
@@ -524,31 +745,37 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
         <div class="artists-grid">
           <div class="ae-card">
             <h3><span class="an">01</span> First Artist</h3>
-            <div class="ae-photo" id="aPrev1" onclick="document.querySelector('.aPhoto1In').click()">
+            <div class="ae-photo" id="aPrev1">
               <span class="ae-ph-lbl">[ Portrait ]</span>
               <img id="aImg1" src="" alt=""/>
               <div class="ae-ph-ov"><span>Change Photo</span></div>
             </div>
-            <label class="ae-up-btn" for="aPhoto1">Upload Portrait</label>
-            <input type="file" class="aPhoto1In" id="aPhoto1" accept="image/*"/>
+            <div style="position:relative;display:inline-block;">
+              <label class="ae-up-btn">Upload Portrait
+                <input type="file" class="aPhoto1In" id="aPhoto1" accept="image/*" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:16px;"/>
+              </label>
+            </div>
             <div class="field"><label>Full Name</label><input type="text" id="a1name" placeholder="e.g. Shuki Neziri"/></div>
             <div class="field"><label>Role / Discipline</label><input type="text" id="a1role" placeholder="e.g. Painter &amp; Printmaker"/></div>
             <div class="field"><label>Biography</label><textarea class="tall" id="a1bio" placeholder="Artist biography…"></textarea></div>
-            <button class="btn-save-a" onclick="saveArtist(1)">Save Artist 1 →</button>
+            <button class="btn-save-a" id="saveArtist1Btn">Save Artist 1 →</button>
           </div>
           <div class="ae-card">
             <h3><span class="an">02</span> Second Artist</h3>
-            <div class="ae-photo" id="aPrev2" onclick="document.querySelector('.aPhoto2In').click()">
+            <div class="ae-photo" id="aPrev2">
               <span class="ae-ph-lbl">[ Portrait ]</span>
               <img id="aImg2" src="" alt=""/>
               <div class="ae-ph-ov"><span>Change Photo</span></div>
             </div>
-            <label class="ae-up-btn" for="aPhoto2">Upload Portrait</label>
-            <input type="file" class="aPhoto2In" id="aPhoto2" accept="image/*"/>
+            <div style="position:relative;display:inline-block;">
+              <label class="ae-up-btn">Upload Portrait
+                <input type="file" class="aPhoto2In" id="aPhoto2" accept="image/*" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:16px;"/>
+              </label>
+            </div>
             <div class="field"><label>Full Name</label><input type="text" id="a2name" placeholder="e.g. Luran Osmani"/></div>
             <div class="field"><label>Role / Discipline</label><input type="text" id="a2role" placeholder="e.g. Photographer &amp; Illustrator"/></div>
             <div class="field"><label>Biography</label><textarea class="tall" id="a2bio" placeholder="Artist biography…"></textarea></div>
-            <button class="btn-save-a" onclick="saveArtist(2)">Save Artist 2 →</button>
+            <button class="btn-save-a" id="saveArtist2Btn">Save Artist 2 →</button>
           </div>
         </div>
       </div>
@@ -561,8 +788,12 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
           <p>Saved in this browser — re-enter only if it expires or you switch devices.<br><br>
             No token? <a href="https://github.com/settings/tokens/new?scopes=repo&description=ST117+Admin" target="_blank">Generate on GitHub →</a> (check the <strong>repo</strong> scope)</p>
           <div class="tok-row">
-            <input class="tok-inp" type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
+            <div style="position:relative;flex:1;">
+              <input class="tok-inp" type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%;padding-right:2.5rem;"/>
+              <button id="toggleTokenView" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink-soft);font-size:.7rem;padding:.2rem;">👁</button>
+            </div>
             <button class="btn-save-tok" id="saveTokenBtn">Save</button>
+            <button id="testTokenBtn">Test</button>
           </div>
         </div>
         <div class="card">
@@ -591,423 +822,766 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;
 (function(){
 'use strict';
 
-/* ── CONFIG ── */
-var OWNER = 'luranosmani024-ai';
-var REPO  = 'luranosmani024-ai.github.io';
-var BRANCH = 'main';
+/* ═══════════════════════════════════════
+   ST117 ADMIN — CONFIG
+═══════════════════════════════════════ */
+var OWNER    = 'st117te';
+var REPO     = 'st117te.github.io';
+var BRANCH   = 'main';
 var PASSWORD = 'Tetova357357';
+var API      = 'https://api.github.com/repos/'+OWNER+'/'+REPO+'/contents/';
 
 var CAT_MATCH = {
-  paintings:   ['painting','paintings'],
-  drawings:    ['drawing','drawings','illustration'],
+  paintings:   ['painting','paintings','mixed media','tempera'],
+  drawings:    ['drawing','drawings','illustration','sketch'],
   photography: ['photography','photo'],
-  printmaking: ['printmaking','print','etching','linocut','screen print','woodblock','monotype']
+  printmaking: ['printmaking','print','etching','linocut','screen print','woodblock','monotype','drypoint','intaglio']
 };
 var SUBCATS = {
   'Painting':    ['Oil','Acrylic','Watercolor','Gouache','Tempera','Mixed'],
-  'Drawing':     ['Pencil','Charcoal','Ink','Portrait','Figure','Sketch'],
-  'Photography': ['Portrait','Landscape','Street','Documentary','Abstract','Architecture'],
-  'Printmaking': ['Etching','Linocut','Screen Print','Woodblock','Monotype','Drypoint'],
-  'Etching':     ['Etching','Drypoint','Intaglio'],
-  'Linocut':     ['Linocut','Lino Relief'],
-  'Screen Print':['Screen Print','Silkscreen'],
-  'Illustration':['Digital','Traditional','Editorial']
+  'Mixed Media': ['Collage','Assemblage','Oil & Acrylic','Paint & Ink','Other'],
+  'Drawing':     ['Pencil','Charcoal','Ink','Ballpoint','Pastel','Portrait','Figure','Sketch'],
+  'Illustration':['Digital','Traditional','Editorial','Book','Poster'],
+  'Sketch':      ['Pencil','Pen','Charcoal','Quick Study'],
+  'Photography': ['Portrait','Landscape','Street','Documentary','Abstract','Architecture','Nature','B&W'],
+  'Printmaking': ['Etching','Linocut','Screen Print','Woodblock','Monotype','Drypoint','Lithography'],
+  'Etching':     ['Drypoint','Intaglio','Aquatint','Soft Ground','Hard Ground'],
+  'Linocut':     ['Single Colour','Multi-colour','Reduction','Relief Print'],
+  'Screen Print':['Silkscreen','1 Colour','2 Colour','Multi-colour']
 };
 
-function rawUrl(p){ return 'https://raw.githubusercontent.com/'+OWNER+'/'+REPO+'/'+BRANCH+'/'+p; }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-/* ── AUTH ── */
-if(sessionStorage.getItem('st117_auth')==='1') unlock();
-document.getElementById('loginBtn').addEventListener('click', tryLogin);
-document.getElementById('pwInput').addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
-function tryLogin(){
-  var pw = document.getElementById('pwInput').value;
-  if(pw === PASSWORD){ sessionStorage.setItem('st117_auth','1'); unlock(); }
-  else{ document.getElementById('loginErr').textContent='Incorrect password.'; document.getElementById('pwInput').value=''; document.getElementById('pwInput').focus(); }
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function tok(){
+  var v=localStorage.getItem('st117_token');
+  if(v) return v;
+  /* localStorage empty — try cookie backup and self-heal */
+  var c=getCookie('st117_tok');
+  if(c){ localStorage.setItem('st117_token',c); setCookie('st117_tok',c,400); return c; }
+  return '';
 }
-function unlock(){ document.getElementById('loginScreen').classList.add('gone'); document.getElementById('app').classList.add('on'); initApp(); }
-document.getElementById('logoutBtn').addEventListener('click', function(){ sessionStorage.removeItem('st117_auth'); location.reload(); });
+function setTok(v){
+  localStorage.setItem('st117_token',v);
+  setCookie('st117_tok',v,400); /* 400 days — browser max, effectively permanent */
+}
+function getCookie(name){
+  var m=document.cookie.match('(?:^|; )'+name+'=([^;]*)');
+  return m?decodeURIComponent(m[1]):'';
+}
+function setCookie(name,value,days){
+  var d=new Date(); d.setTime(d.getTime()+days*24*60*60*1000);
+  document.cookie=name+'='+encodeURIComponent(value)+';expires='+d.toUTCString()+';path=/;SameSite=Lax';
+}
+function rawStable(p){ return 'https://'+OWNER+'.github.io/'+p; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function $(id){ return document.getElementById(id); }
+function sd(id,v){ var e=$(id); if(e) e.style.display=v; }
+function sv(id,v){ var e=$(id); if(e) e.value=v; }
 
-/* ── PANELS ── */
+/* ═══════════════════════════════════════
+   STATUS BAR
+═══════════════════════════════════════ */
+var _stTimer=null;
+function showStatus(msg,type){
+  var bar=$('statusBar'); if(!bar) return;
+  bar.textContent=msg; bar.className='status '+(type||'');
+  if(_stTimer) clearTimeout(_stTimer);
+  if(type!=='loading') _stTimer=setTimeout(function(){bar.className='status';bar.textContent='';},7000);
+}
+
+/* ═══════════════════════════════════════
+   AUTH — uses localStorage so survives refresh
+═══════════════════════════════════════ */
+if(localStorage.getItem('st117_auth')==='1') unlock();
+var _loginBtn=$('loginBtn'); if(_loginBtn) _loginBtn.addEventListener('click', tryLogin);
+var _pwInput=$('pwInput'); if(_pwInput) _pwInput.addEventListener('keydown',function(e){if(e.key==='Enter')tryLogin();});
+function tryLogin(){
+  var el=$('pwInput'); var pw=el?el.value:'';
+  if(pw===PASSWORD){ localStorage.setItem('st117_auth','1'); unlock(); }
+  else{ var err=$('loginErr'); if(err)err.textContent='Incorrect password.'; if(el){el.value='';el.focus();} }
+}
+function unlock(){
+  var ls=$('loginScreen'); if(ls) ls.classList.add('gone');
+  var ap=$('app'); if(ap) ap.classList.add('on');
+  initApp();
+}
+var _logoutBtn=$('logoutBtn');
+if(_logoutBtn) _logoutBtn.addEventListener('click',function(){
+  localStorage.removeItem('st117_auth'); location.reload();
+});
+
+/* ═══════════════════════════════════════
+   PANELS
+═══════════════════════════════════════ */
 function switchPanel(id){
-  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  var p = document.getElementById('panel-'+id); if(p) p.classList.add('active');
-  document.querySelectorAll('.nav-item[data-panel="'+id+'"]').forEach(function(n){ n.classList.add('active'); });
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var p=$('panel-'+id); if(p) p.classList.add('active');
+  document.querySelectorAll('.nav-item[data-panel="'+id+'"]').forEach(function(n){n.classList.add('active');});
   closeSidebar();
   if(id==='works') setTimeout(refreshWInd,60);
   if(id==='featured') loadFeaturedPanel();
 }
 document.querySelectorAll('.nav-item').forEach(function(btn){
-  btn.addEventListener('click', function(){ switchPanel(btn.dataset.panel); });
-});
-
-/* ── MOBILE SIDEBAR ── */
-var sidebar = document.getElementById('sidebar');
-var sbOverlay = document.getElementById('sbOverlay');
-document.getElementById('burgerBtn').addEventListener('click', function(){ sidebar.classList.toggle('open'); sbOverlay.classList.toggle('show'); });
-sbOverlay.addEventListener('click', closeSidebar);
-function closeSidebar(){ sidebar.classList.remove('open'); sbOverlay.classList.remove('show'); }
-
-/* ── STATUS ── */
-var stT = null;
-function showStatus(msg, type){
-  var bar = document.getElementById('statusBar');
-  bar.textContent = msg; bar.className = 'status '+type;
-  if(stT) clearTimeout(stT);
-  if(type !== 'loading') stT = setTimeout(function(){ bar.className='status'; }, 6000);
-}
-
-/* ── WORKS TAB INDICATOR ── */
-var activeLcat = 'all';
-function refreshWInd(){
-  var tabs = document.getElementById('worksTabs');
-  var ind  = document.getElementById('wInd');
-  if(!tabs||!ind) return;
-  var active = tabs.querySelector('.w-tab.active'); if(!active) return;
-  var tr = tabs.getBoundingClientRect(); var ar = active.getBoundingClientRect();
-  ind.style.width = ar.width+'px'; ind.style.left = (ar.left-tr.left)+'px'; ind.style.top='0'; ind.style.bottom='0';
-}
-document.getElementById('worksTabs').querySelectorAll('.w-tab').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    document.querySelectorAll('.w-tab').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active'); activeLcat = btn.dataset.lcat;
-    setTimeout(refreshWInd,20);
-    if(window._aw) renderList(window._aw, activeLcat);
+  btn.addEventListener('click',function(){
+    switchPanel(btn.dataset.panel);
+    if(btn.dataset.panel==='works'&&window._aw) renderList(window._aw,activeLcat);
+    if(btn.dataset.panel==='featured') renderFeatSlots();
   });
 });
-window.addEventListener('resize', refreshWInd, {passive:true});
 
-/* ── GITHUB TOKEN ── */
-var ghToken = localStorage.getItem('st117_token') || '';
-if(ghToken){ document.getElementById('ghTokenInput').value = ghToken; updateTokenStatus(); }
-document.getElementById('saveTokenBtn').addEventListener('click', function(){
-  var v = document.getElementById('ghTokenInput').value.trim();
-  if(!v){ showStatus('Token cannot be empty','err'); return; }
-  ghToken = v; localStorage.setItem('st117_token', v); updateTokenStatus(); showStatus('✓ Token saved','ok');
+/* ═══════════════════════════════════════
+   SIDEBAR (mobile)
+═══════════════════════════════════════ */
+var sidebar=$('sidebar'), sbOverlay=$('sbOverlay');
+var _burger=$('burgerBtn');
+if(_burger) _burger.addEventListener('click',function(){
+  if(sidebar) sidebar.classList.toggle('open');
+  if(sbOverlay) sbOverlay.classList.toggle('show');
 });
-function updateTokenStatus(){
-  var ts = document.getElementById('tokenStatus');
-  ts.textContent = ghToken ? '✓ Saved' : '— Not set'; ts.style.color = ghToken ? 'var(--green)' : '';
-  document.getElementById('tokenRepo').textContent = OWNER+'/'+REPO;
-  var su = document.getElementById('siteUrl'); if(su) su.textContent = 'https://'+OWNER+'.github.io';
+if(sbOverlay) sbOverlay.addEventListener('click',closeSidebar);
+function closeSidebar(){
+  if(sidebar) sidebar.classList.remove('open');
+  if(sbOverlay) sbOverlay.classList.remove('show');
 }
 
-/* ── GITHUB API ── */
-var API = 'https://api.github.com/repos/'+OWNER+'/'+REPO+'/contents/';
-function ghH(){ return {'Authorization':'Bearer '+ghToken,'Content-Type':'application/json','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
-function ghFetch(method, path, body){
-  return fetch(API+path, {method:method, headers:ghH(), body:body?JSON.stringify(body):undefined})
+/* ═══════════════════════════════════════
+   WORKS TABS
+═══════════════════════════════════════ */
+var activeLcat='all';
+function refreshWInd(){
+  var tabs=$('worksTabs'), ind=$('wInd');
+  if(!tabs||!ind) return;
+  var active=tabs.querySelector('.w-tab.active'); if(!active) return;
+  var tr=tabs.getBoundingClientRect(), ar=active.getBoundingClientRect();
+  ind.style.width=ar.width+'px'; ind.style.left=(ar.left-tr.left)+'px';
+  ind.style.top='0'; ind.style.bottom='0';
+}
+var _wt=$('worksTabs');
+(_wt?_wt.querySelectorAll('.w-tab'):[]).forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.w-tab').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active'); activeLcat=btn.dataset.lcat;
+    setTimeout(refreshWInd,20);
+    var srch=$('awSearch');if(srch)srch.value='';
+    if(window._aw) renderList(window._aw,activeLcat);
+  });
+});
+window.addEventListener('resize',function(){ if($('worksTabs')) refreshWInd(); },{passive:true});
+
+/* ═══════════════════════════════════════
+   TOKEN PANEL
+═══════════════════════════════════════ */
+function updateTokenStatus(){
+  var t=tok();
+  var ts=$('tokenStatus');
+  if(ts){ ts.textContent=t?'✓ Saved':'— Not set'; ts.style.color=t?'var(--green)':''; }
+  var tr=$('tokenRepo'); if(tr) tr.textContent=OWNER+'/'+REPO;
+  var su=$('siteUrl'); if(su) su.textContent='https://'+OWNER+'.github.io';
+  var warn=$('tokenWarn'); if(warn) warn.style.display=t?'none':'flex';
+}
+/* eye toggle */
+var _ttv=$('toggleTokenView');
+if(_ttv) _ttv.addEventListener('click',function(){
+  var i=$('ghTokenInput'); if(i) i.type=i.type==='password'?'text':'password';
+});
+/* token warn btn */
+var _twb=$('tokenWarnBtn');
+if(_twb) _twb.addEventListener('click',function(){switchPanel('token');});
+/* test token */
+var _testBtn=$('testTokenBtn');
+if(_testBtn) _testBtn.addEventListener('click',function(){
+  var v=($('ghTokenInput')||{}).value||''; v=v.trim();
+  if(!v){showStatus('Enter a token first','err');return;}
+  _testBtn.textContent='Testing…'; _testBtn.disabled=true;
+  fetch('https://api.github.com/repos/'+OWNER+'/'+REPO,{
+    headers:{'Authorization':'Bearer '+v,'Accept':'application/vnd.github+json'}
+  }).then(function(r){
+    _testBtn.textContent='Test'; _testBtn.disabled=false;
+    if(r.status===200) showStatus('✓ Token valid — ready to publish!','ok');
+    else if(r.status===401) showStatus('✗ Invalid token — create a new one on GitHub','err');
+    else if(r.status===403) showStatus('✗ No permission — token needs "repo" scope','err');
+    else if(r.status===404) showStatus('✗ Repo not found: '+OWNER+'/'+REPO,'err');
+    else showStatus('✗ Error '+r.status,'err');
+  }).catch(function(){_testBtn.textContent='Test';_testBtn.disabled=false;showStatus('✗ Network error','err');});
+});
+/* save token */
+var _saveToken=$('saveTokenBtn');
+if(_saveToken) _saveToken.addEventListener('click',function(){
+  var v=($('ghTokenInput')||{}).value||''; v=v.trim();
+  if(!v){showStatus('Token cannot be empty','err');return;}
+  setTok(v);
+  updateTokenStatus();
+  showStatus('✓ Token saved — ready to publish!','ok');
+  setTimeout(function(){switchPanel('upload');},1000);
+});
+
+/* ═══════════════════════════════════════
+   GITHUB API
+═══════════════════════════════════════ */
+function ghH(){
+  return {
+    'Authorization':'Bearer '+tok(),
+    'Content-Type':'application/json',
+    'Accept':'application/vnd.github+json',
+    'X-GitHub-Api-Version':'2022-11-28'
+  };
+}
+function ghFetch(method,path,body){
+  if(!tok()){ switchPanel('token'); throw new Error('No token saved — please save your GitHub token first.'); }
+  return fetch(API+path,{method:method,headers:ghH(),body:body?JSON.stringify(body):undefined})
     .then(function(r){
       if(r.status===404) return null;
-      return r.json().then(function(data){ if(!r.ok) throw new Error(data.message||'GitHub '+r.status+' on '+path); return data; });
+      if(r.status===401) return r.json().then(function(){ throw new Error('Token invalid or expired — go to GitHub Token panel and save a new one.'); });
+      if(r.status===403) return r.json().then(function(){ throw new Error('Permission denied — token needs "repo" scope.'); });
+      if(r.status===422) return r.json().then(function(d){ throw new Error('SHA conflict — reload admin and try again. ('+( d.message||'422')+')'); });
+      return r.json().then(function(data){ if(!r.ok) throw new Error(data.message||'GitHub error '+r.status); return data; });
     });
 }
 function loadData(){
   return ghFetch('GET','artworks.json').then(function(f){
     if(!f) return {list:[],sha:null};
-    try{ return {list:JSON.parse(atob(f.content.replace(/[\r\n\s]/g,''))), sha:f.sha}; }
-    catch(e){ return {list:[],sha:f.sha}; }
-  });
-}
-function b64File(f){
-  return new Promise(function(res,rej){
-    var r = new FileReader(); r.onload=function(e){res(e.target.result.split(',')[1]);}; r.onerror=rej; r.readAsDataURL(f);
+    try{
+      var raw=f.content.replace(/[\r\n\s]/g,'');
+      var parsed=JSON.parse(atob(raw));
+      return {list:Array.isArray(parsed)?parsed:[], sha:f.sha};
+    }catch(e){ return {list:[],sha:f.sha}; }
   });
 }
 
-/* ── SUBCATS ── */
-document.getElementById('fType').addEventListener('change', function(){
-  var type = this.value; var wrap = document.getElementById('subcatWrap'); var sel = document.getElementById('fSubcat');
-  var subs = SUBCATS[type];
-  if(subs&&subs.length){ sel.innerHTML='<option value="">— Select —</option>'+subs.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join(''); wrap.style.display='block'; }
-  else{ sel.innerHTML='<option value="">— Select —</option>'; wrap.style.display='none'; }
+/* ═══════════════════════════════════════
+   IMAGE COMPRESSION
+═══════════════════════════════════════ */
+function compressAndEncode(file,qualityMode){
+  return new Promise(function(resolve,reject){
+    var MAX=1800;
+    var Q=qualityMode==='lossless'?1.0:qualityMode==='balanced'?0.80:0.90;
+    var skip=qualityMode==='lossless';
+    var reader=new FileReader();
+    reader.onerror=function(){reject(new Error('Cannot read file'));};
+    reader.onload=function(ev){
+      var img=new Image();
+      img.onerror=function(){reject(new Error('Cannot decode image'));};
+      img.onload=function(){
+        var w=img.naturalWidth,h=img.naturalHeight;
+        if(!skip&&(w>MAX||h>MAX)){var r=Math.min(MAX/w,MAX/h);w=Math.round(w*r);h=Math.round(h*r);}
+        var c=document.createElement('canvas');
+        c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        var b64=c.toDataURL('image/jpeg',Q).split(',')[1];
+        resolve(b64);
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ═══════════════════════════════════════
+   ART TYPE → SUBCATEGORY
+═══════════════════════════════════════ */
+var _fType=$('fType');
+if(_fType) _fType.addEventListener('change',function(){
+  var subs=SUBCATS[this.value]||[];
+  var wrap=$('subcatWrap'),sel=$('fSubcat');
+  if(subs.length){
+    sel.innerHTML='<option value="">— Select —</option>'+subs.map(function(s){return'<option>'+s+'</option>';}).join('');
+    wrap.style.display='block';
+  } else {
+    sel.innerHTML='<option value="">— Select —</option>';
+    wrap.style.display='none';
+  }
 });
 
-/* ── DROP ZONE ── */
-var pendingFile = null;
-var dz = document.getElementById('dropZone'); var fi = document.getElementById('fileInput');
-dz.addEventListener('click', function(){ fi.click(); });
-dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('over'); });
-dz.addEventListener('dragleave', function(){ dz.classList.remove('over'); });
-dz.addEventListener('drop', function(e){ e.preventDefault(); dz.classList.remove('over'); var f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) loadPreview(f); });
-fi.addEventListener('change', function(){ if(fi.files[0]) loadPreview(fi.files[0]); });
+/* ═══════════════════════════════════════
+   DROP ZONE
+═══════════════════════════════════════ */
+var pendingFile=null;
+var dz=$('dropZone'), fi=$('fileInput');
+if(dz){
+  dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over');});
+  dz.addEventListener('dragleave',function(){dz.classList.remove('over');});
+  dz.addEventListener('drop',function(e){
+    e.preventDefault();dz.classList.remove('over');
+    var f=e.dataTransfer.files[0];
+    if(f&&f.type.startsWith('image/')) loadPreview(f);
+  });
+}
+if(fi){
+  fi.addEventListener('change',function(){if(fi.files[0]) loadPreview(fi.files[0]);});
+  fi.addEventListener('click',function(){this.value='';});
+}
 function loadPreview(f){
   pendingFile=f;
-  var r=new FileReader(); r.onload=function(e){
-    document.getElementById('dropPrev').src=e.target.result; document.getElementById('dropPrev').style.display='block';
-    document.getElementById('dropFname').textContent=f.name; document.getElementById('dropFname').style.display='block';
-    document.getElementById('dropIcon').style.display='none'; document.getElementById('dropMain').style.display='none'; document.getElementById('dropHint').style.display='none';
-  }; r.readAsDataURL(f);
+  var r=new FileReader();
+  r.onerror=function(){showStatus('Could not read image','err');pendingFile=null;};
+  r.onload=function(e){
+    var prev=$('dropPrev'); if(prev){prev.src=e.target.result;prev.style.display='block';}
+    var kb=Math.round(f.size/1024);
+    var sz=kb>1024?(kb/1024).toFixed(1)+' MB':kb+' KB';
+    var fn=$('dropFname'); if(fn){fn.textContent=f.name+' ('+sz+')';fn.style.display='block';}
+    ['dropIcon','dropMain','dropHint'].forEach(function(id){sd(id,'none');});
+  };
+  r.readAsDataURL(f);
 }
 function resetForm(){
   pendingFile=null;
-  document.getElementById('dropPrev').style.display='none'; document.getElementById('dropFname').style.display='none';
-  document.getElementById('dropIcon').style.display='block'; document.getElementById('dropMain').style.display='block'; document.getElementById('dropHint').style.display='block';
-  fi.value='';
-  ['fTitle','fDesc','fSize','fYear','fPrice'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('fType').value=''; document.getElementById('fSubcat').value='';
-  document.getElementById('fFeatured').checked=false; document.getElementById('subcatWrap').style.display='none';
+  var prev=$('dropPrev'); if(prev){prev.src='';prev.style.display='none';}
+  sd('dropFname','none');sd('dropIcon','block');sd('dropMain','block');sd('dropHint','block');
+  if(fi) fi.value='';
+  ['fTitle','fDesc','fSize','fYear','fPrice'].forEach(function(id){sv(id,'');});
+  sv('fType','');sv('fSubcat','');
+  var ff=$('fFeatured'); if(ff) ff.checked=false;
+  sd('subcatWrap','none');
+  var q=$('fQuality'); if(q) q.value='high';
+  /* reset panel heading in case we were in edit mode */
+  var ph=document.querySelector('#panel-upload .ph h1');
+  if(ph) ph.textContent='Publish Artwork';
 }
 
-/* ── PUBLISH ── */
-document.getElementById('publishBtn').addEventListener('click', function(){
-  if(!ghToken){ showStatus('Save your GitHub token first (GitHub Token in sidebar)','err'); return; }
-  if(!pendingFile){ showStatus('Select an image first','err'); return; }
-  var title = document.getElementById('fTitle').value.trim();
-  if(!title){ showStatus('Enter a title for this artwork','err'); return; }
+/* ═══════════════════════════════════════
+   PUBLISH
+═══════════════════════════════════════ */
+var _pb=$('publishBtn');
+if(_pb) _pb.addEventListener('click',function(){
+  if(!tok()){showStatus('Save your GitHub token first','err');switchPanel('token');return;}
+  var title=($('fTitle')||{}).value||''; title=title.trim();
+  if(!title){showStatus('Enter a title','err');return;}
+  if(editingId){saveEditedWork(editingId,title);return;}
+  if(!pendingFile){showStatus('Select an image first','err');return;}
 
-  var btn = document.getElementById('publishBtn'); btn.disabled=true; btn.textContent='Publishing…';
-  var ext = (pendingFile.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');
-  if(!ext||ext.length>4) ext='jpg';
-  var safe = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'-'+Date.now()+'.'+ext;
-  var imgPath = 'images/'+safe;
+  var btn=$('publishBtn'); btn.disabled=true; btn.textContent='Publishing…';
+  var safe=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'-'+Date.now()+'.jpg';
+  var imgPath='images/'+safe;
+  var qualMode=($('fQuality')||{}).value||'high';
 
-  showStatus('Step 1/3 — Uploading image…','loading');
-  b64File(pendingFile)
+  showStatus('Step 1/3 — Compressing image…','loading');
+  compressAndEncode(pendingFile,qualMode)
   .then(function(b64){
-    return ghFetch('PUT', imgPath, {message:'Add image: '+safe, content:b64, branch:BRANCH});
+    showStatus('Step 2/3 — Uploading image…','loading');
+    return ghFetch('PUT',imgPath,{message:'Add: '+safe,content:b64,branch:BRANCH});
   })
   .then(function(resp){
-    if(!resp) throw new Error('Image upload failed — confirm token has "repo" scope');
-    showStatus('Step 2/3 — Loading artwork list…','loading');
+    if(!resp||!resp.content) throw new Error('Image upload failed — check token has "repo" scope');
+    showStatus('Step 3/3 — Saving artwork data…','loading');
     return loadData();
   })
   .then(function(result){
-    showStatus('Step 3/3 — Saving artwork data…','loading');
-    var list=result.list; var sha=result.sha;
+    var list=result.list, sha=result.sha;
     list.unshift({
-      id: Date.now(), image: imgPath, title: title,
-      type: document.getElementById('fType').value||'',
-      subcategory: document.getElementById('fSubcat').value||'',
-      description: document.getElementById('fDesc').value.trim()||'',
-      size: document.getElementById('fSize').value.trim()||'',
-      year: document.getElementById('fYear').value.trim()||'',
-      price: document.getElementById('fPrice').value.trim()||'',
-      featured: document.getElementById('fFeatured').checked,
-      date: new Date().toISOString()
+      id:Date.now(), image:imgPath, title:title,
+      type:($('fType')||{}).value||'',
+      subcategory:($('fSubcat')||{}).value||'',
+      description:(($('fDesc')||{}).value||'').trim(),
+      size:(($('fSize')||{}).value||'').trim(),
+      year:(($('fYear')||{}).value||'').trim(),
+      price:(($('fPrice')||{}).value||'').trim(),
+      featured:($('fFeatured')||{}).checked||false,
+      date:new Date().toISOString()
     });
-    var content = btoa(unescape(encodeURIComponent(JSON.stringify(list,null,2))));
-    var body = {message:'Publish: '+title, content:content, branch:BRANCH};
+    var j=JSON.stringify(list,null,2);
+    var content;try{content=btoa(unescape(encodeURIComponent(j)));}catch(e){content=btoa(unescape(encodeURIComponent(j.replace(/[\u0080-\uFFFF]/g,'?'))));}
+    var body={message:'Publish: '+title,content:content,branch:BRANCH};
     if(sha) body.sha=sha;
     return ghFetch('PUT','artworks.json',body).then(function(r){
-      if(!r) throw new Error('Failed to save artworks.json — try again');
+      if(!r||(!r.content&&!r.commit)) throw new Error('Failed to save artworks.json — try again');
       return list;
     });
   })
   .then(function(list){
-    showStatus('✓ Published! Site updates in ~1 minute.','ok');
+    showStatus('✓ Published! Site updates in ~60 seconds.','ok');
     resetForm(); window._aw=list;
     switchPanel('works'); renderList(list,'all');
   })
-  .catch(function(err){ showStatus('✗ '+err.message,'err'); console.error('[ST117]',err); })
-  .then(function(){ btn.disabled=false; btn.textContent='Publish Artwork →'; });
+  .catch(function(err){
+    showStatus('✗ '+(err&&err.message?err.message:'Unknown error'),'err');
+    console.error('[ST117]',err);
+  })
+  .then(function(){
+    var b=$('publishBtn');
+    if(b&&!editingId){b.disabled=false;b.textContent='Publish Artwork →';}
+  });
 });
 
-/* ── WORKS LIST ── */
+/* ═══════════════════════════════════════
+   EDIT
+═══════════════════════════════════════ */
+var editingId=null;
+var _ceb=$('cancelEditBtn');
+if(_ceb) _ceb.addEventListener('click',cancelEdit);
+
+function openEditPanel(id){
+  var art=(window._aw||[]).find(function(x){return x.id===id;});
+  if(!art){showStatus('Artwork not found','err');return;}
+  editingId=id;
+  sv('fTitle',art.title||'');
+  var te=$('fType'); if(te){te.value=art.type||'';te.dispatchEvent(new Event('change'));}
+  setTimeout(function(){sv('fSubcat',art.subcategory||'');},80);
+  sv('fDesc',art.description||'');
+  sv('fSize',art.size||'');
+  sv('fYear',art.year||'');
+  sv('fPrice',art.price||'');
+  var ff=$('fFeatured'); if(ff) ff.checked=!!art.featured;
+  var prev=$('dropPrev');
+  if(prev){prev.src=rawStable(art.image);prev.style.display='block';}
+  var fn=$('dropFname');
+  if(fn){fn.textContent='Current image — drop new one to replace';fn.style.display='block';}
+  ['dropIcon','dropMain','dropHint'].forEach(function(id){sd(id,'none');});
+  pendingFile=null;
+  var pb=$('publishBtn'); if(pb) pb.textContent='Save Changes →';
+  var ph=document.querySelector('#panel-upload .ph h1'); if(ph) ph.textContent='Edit Artwork';
+  var cb=$('cancelEditBtn'); if(cb) cb.style.display='inline-flex';
+  switchPanel('upload');
+  showStatus('Editing "'+esc(art.title)+'" — update and press Save Changes →','loading');
+}
+function cancelEdit(){
+  editingId=null; pendingFile=null; resetForm();
+  var pb=$('publishBtn'); if(pb) pb.textContent='Publish Artwork →';
+  var ph=document.querySelector('#panel-upload .ph h1'); if(ph) ph.textContent='Publish Artwork';
+  var sb=$('statusBar'); if(sb){sb.className='status';sb.textContent='';}
+  var cb=$('cancelEditBtn'); if(cb) cb.style.display='none';
+}
+function saveEditedWork(id,title){
+  var btn=$('publishBtn'); if(btn){btn.disabled=true;btn.textContent='Saving…';}
+  var old=(window._aw||[]).find(function(x){return x.id===id;});
+  if(!old){showStatus('Artwork not found','err');if(btn){btn.disabled=false;btn.textContent='Save Changes →';}return;}
+  var doSave=function(newImg){
+    showStatus('Saving…','loading');
+    loadData().then(function(result){
+      var list=result.list,sha=result.sha;
+      var idx=list.findIndex(function(x){return x.id===id;});
+      if(idx===-1) throw new Error('Artwork not found in JSON');
+      list[idx]=Object.assign({},list[idx],{
+        title:title,
+        type:($('fType')||{}).value||'',
+        subcategory:($('fSubcat')||{}).value||'',
+        description:(($('fDesc')||{}).value||'').trim(),
+        size:(($('fSize')||{}).value||'').trim(),
+        year:(($('fYear')||{}).value||'').trim(),
+        price:(($('fPrice')||{}).value||'').trim(),
+        featured:($('fFeatured')||{}).checked||false,
+        image:newImg||list[idx].image
+      });
+      var j=JSON.stringify(list,null,2);
+      var content;try{content=btoa(unescape(encodeURIComponent(j)));}catch(e){content=btoa(unescape(encodeURIComponent(j.replace(/[\u0080-\uFFFF]/g,'?'))));}
+      var body={message:'Edit: '+title,content:content,branch:BRANCH}; if(sha) body.sha=sha;
+      return ghFetch('PUT','artworks.json',body).then(function(){return list;});
+    }).then(function(list){
+      showStatus('✓ Saved! Site updates in ~60 seconds.','ok');
+      window._aw=list; cancelEdit(); switchPanel('works'); renderList(list,activeLcat);
+    }).catch(function(err){
+      showStatus('✗ '+err.message,'err');
+    }).then(function(){
+      if(btn){btn.disabled=false;btn.textContent='Save Changes →';}
+    });
+  };
+  if(pendingFile){
+    var safe=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'-'+Date.now()+'.jpg';
+    var newPath='images/'+safe;
+    showStatus('Uploading new image…','loading');
+    compressAndEncode(pendingFile,($('fQuality')||{}).value||'high')
+    .then(function(b64){ return ghFetch('PUT',newPath,{message:'Replace: '+safe,content:b64,branch:BRANCH}); })
+    .then(function(resp){
+      if(!resp) throw new Error('Image upload failed');
+      ghFetch('GET',old.image).then(function(f){
+        if(f&&f.sha) return ghFetch('DELETE',old.image,{message:'Delete old image',sha:f.sha,branch:BRANCH});
+      }).catch(function(){});
+      return newPath;
+    })
+    .then(function(p){doSave(p);})
+    .catch(function(err){showStatus('✗ '+err.message,'err');if(btn){btn.disabled=false;btn.textContent='Save Changes →';}});
+  } else { doSave(null); }
+}
+
+
+/* ── SIDEBAR STATS ── */
+function updateSbStats(list){
+  var el=document.getElementById('sbStats'); if(!el) return;
+  var total=list.length;
+  var cats={paintings:0,drawings:0,photography:0,printmaking:0};
+  list.forEach(function(a){
+    Object.keys(CAT_MATCH).forEach(function(cat){
+      if(CAT_MATCH[cat].some(function(m){return(a.type||'').toLowerCase().indexOf(m)!==-1;}))
+        cats[cat]=(cats[cat]||0)+1;
+    });
+  });
+  el.innerHTML='<div class="sb-stat">Total<span>'+total+'</span></div>'
+    +Object.keys(cats).filter(function(k){return cats[k]>0;}).map(function(k){
+      return '<div class="sb-stat">'+k.charAt(0).toUpperCase()+k.slice(1,4)+'<span>'+cats[k]+'</span></div>';
+    }).join('');
+}
+
+/* ═══════════════════════════════════════
+   WORKS LIST
+═══════════════════════════════════════ */
 function catMatchA(a,cat){ if(cat==='all') return true; var t=(a.type||'').toLowerCase(); return (CAT_MATCH[cat]||[]).some(function(m){return t===m||t.indexOf(m)!==-1;}); }
-function renderList(list, cat){
+function renderList(list,cat){
   window._aw=list;
   var filtered=list.filter(function(a){return catMatchA(a,cat);});
-  document.getElementById('listCount').textContent=filtered.length+' artwork'+(filtered.length!==1?'s':'');
-  var el=document.getElementById('awList');
-  if(!filtered.length){el.innerHTML='<div class="list-empty"><div class="ei">—</div><p>No artworks here yet.<br>Publish your first one.</p></div>';return;}
+  var lc=$('listCount'); if(lc) lc.textContent=filtered.length+' artwork'+(filtered.length!==1?'s':'');
+  var tn=$('totalWorksNote');if(tn&&list.length>0)tn.textContent='('+list.length+' total)';
+  updateSbStats(list);
+  var el=$('awList'); if(!el) return;
+  if(!filtered.length){
+    el.innerHTML='<div class="list-empty"><div class="ei">—</div><p>No artworks yet.<br>Publish your first one.</p></div>';
+    return;
+  }
   el.innerHTML=filtered.map(function(a,i){
-    var imgSrc=rawUrl(a.image);
+    var src=rawStable(a.image);
     var meta=[a.type,a.year,a.size].filter(Boolean).join(' · ');
-    return'<div class="aw-card" style="animation-delay:'+(i*.035)+'s">'
-      +'<img class="aw-thumb" src="'+esc(imgSrc)+'" alt="" loading="lazy" onerror="this.style.opacity=\'.12\'"/>'
-      +'<div class="aw-body"><div class="aw-name">'+esc(a.title||'—')+'</div>'
+    return'<div class="aw-card" style="animation-delay:'+(i*.03)+'s">'
+      +'<img class="aw-thumb" src="'+esc(src)+'" alt="" loading="lazy" onerror="this.style.opacity=0.12"/>'
+      +'<div class="aw-body">'
+      +'<div class="aw-name">'+esc(a.title||'—')+'</div>'
       +'<div class="aw-meta">'+esc(meta)+'</div>'
       +'<div class="aw-badges">'
       +(a.type?'<span class="bdg bdg-type">'+esc(a.type)+'</span>':'')
       +(a.price?'<span class="bdg bdg-price">'+esc(a.price)+'</span>':'')
       +(a.subcategory?'<span class="bdg bdg-sub">'+esc(a.subcategory)+'</span>':'')
-      +'<span class="bdg bdg-feat'+(a.featured?' on':'')+'" data-id="'+a.id+'">'+(a.featured?'★ Featured':'☆ Feature')+'</span>'
+      +'<span class="bdg bdg-feat'+(a.featured?' on':'')+'" data-id="'+a.id+'">'+( a.featured?'&#9733; Featured':'&#9734; Feature')+'</span>'
       +'</div></div>'
-      +'<div class="aw-acts"><button class="btn-del" data-id="'+a.id+'">Delete</button></div>'
+      +'<div class="aw-acts"><a class="btn-edit btn-site" href="https://'+OWNER+'.github.io" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Site</a><button class="btn-edit btn-edit-real" data-id="'+a.id+'">Edit</button><button class="btn-del" data-id="'+a.id+'">Delete</button></div>'
       +'</div>';
   }).join('');
-  el.querySelectorAll('.bdg-feat').forEach(function(b){ b.addEventListener('click',function(){toggleFeatured(+b.dataset.id);}); });
-  el.querySelectorAll('.btn-del').forEach(function(b){ b.addEventListener('click',function(){deleteWork(+b.dataset.id);}); });
+  el.querySelectorAll('.btn-edit-real').forEach(function(b){b.addEventListener('click',function(){openEditPanel(+b.dataset.id);});});
+  el.querySelectorAll('.btn-del').forEach(function(b){b.addEventListener('click',function(){deleteWork(+b.dataset.id);});});
   setTimeout(refreshWInd,50);
 }
-
 function toggleFeatured(id){
-  if(!ghToken){showStatus('Save token first','err');return;}
+  if(!tok()){showStatus('Save token first','err');return;}
   showStatus('Updating…','loading');
   loadData().then(function(result){
-    var list=result.list; var sha=result.sha;
+    var list=result.list,sha=result.sha;
     var a=list.find(function(x){return x.id===id;}); if(!a) throw new Error('Not found');
     a.featured=!a.featured;
-    var content=btoa(unescape(encodeURIComponent(JSON.stringify(list,null,2))));
-    var body={message:'Toggle featured: '+a.title,content:content,branch:BRANCH}; if(sha)body.sha=sha;
+    var j=JSON.stringify(list,null,2);
+    var content;try{content=btoa(unescape(encodeURIComponent(j)));}catch(e){content=btoa(unescape(encodeURIComponent(j.replace(/[\u0080-\uFFFF]/g,'?'))));}
+    var body={message:'Toggle featured: '+a.title,content:content,branch:BRANCH}; if(sha) body.sha=sha;
     return ghFetch('PUT','artworks.json',body).then(function(){
-      showStatus(a.featured?'★ Marked as featured':'Removed from featured','ok');
-      window._aw=list; renderList(list,activeLcat);
+      showStatus(a.featured?'★ Featured':'Removed from featured','ok');
+      window._aw=list; renderList(list,activeLcat); renderFeatSlots();
     });
   }).catch(function(err){showStatus('✗ '+err.message,'err');});
 }
-
 function deleteWork(id){
-  if(!confirm('Delete this artwork permanently? This cannot be undone.')) return;
-  if(!ghToken){showStatus('Save token first','err');return;}
+  if(!confirm('Delete this artwork? Cannot be undone.')) return;
+  if(!tok()){showStatus('Save token first','err');return;}
   showStatus('Deleting…','loading');
   var toDelete=null;
   loadData().then(function(result){
-    var list=result.list; var sha=result.sha;
+    var list=result.list,sha=result.sha;
     toDelete=list.find(function(x){return x.id===id;}); if(!toDelete) throw new Error('Not found');
     var updated=list.filter(function(x){return x.id!==id;});
-    var content=btoa(unescape(encodeURIComponent(JSON.stringify(updated,null,2))));
-    var body={message:'Delete: '+toDelete.title,content:content,branch:BRANCH}; if(sha)body.sha=sha;
+    var j=JSON.stringify(updated,null,2);
+    var content;try{content=btoa(unescape(encodeURIComponent(j)));}catch(e){content=btoa(unescape(encodeURIComponent(j.replace(/[\u0080-\uFFFF]/g,'?'))));}
+    var body={message:'Delete: '+toDelete.title,content:content,branch:BRANCH}; if(sha) body.sha=sha;
     return ghFetch('PUT','artworks.json',body).then(function(){return updated;});
   }).then(function(updated){
-    /* also delete image file */
-    if(toDelete&&toDelete.image){
-      return ghFetch('GET',toDelete.image).then(function(f){
-        if(f&&f.sha) return ghFetch('DELETE',toDelete.image,{message:'Delete image',sha:f.sha,branch:BRANCH});
-      }).catch(function(){}).then(function(){return updated;});
-    }
-    return updated;
-  }).then(function(updated){
     showStatus('✓ Deleted','ok'); window._aw=updated; renderList(updated,activeLcat);
+    if(toDelete&&toDelete.image){
+      ghFetch('GET',toDelete.image).then(function(f){
+        if(f&&f.sha) return ghFetch('DELETE',toDelete.image,{message:'Delete image',sha:f.sha,branch:BRANCH});
+      }).catch(function(){});
+    }
   }).catch(function(err){showStatus('✗ '+err.message,'err');});
 }
 
-/* ── FEATURED PICKER ── */
-var pickerSlot = 1;
-var featuredIds = {1: null, 2: null};
-
+/* ═══════════════════════════════════════
+   FEATURED PICKER
+═══════════════════════════════════════ */
+var pickerSlot=1, featuredIds={1:null,2:null};
+(function(){
+  var s1=$('featSlot1'),s2=$('featSlot2');
+  if(s1) s1.addEventListener('click',function(e){e.stopPropagation();openPicker(1);});
+  if(s2) s2.addEventListener('click',function(e){e.stopPropagation();openPicker(2);});
+})();
 function loadFeaturedPanel(){
-  /* load saved featured IDs from localStorage */
-  var saved = localStorage.getItem('st117_featured');
-  if(saved){ try{featuredIds=JSON.parse(saved);}catch(e){} }
+  var saved=localStorage.getItem('st117_featured');
+  if(saved){try{featuredIds=JSON.parse(saved);}catch(e){}}
+  syncFeaturedFromAW();
   renderFeatSlots();
+}
+function syncFeaturedFromAW(){
+  if(!window._aw) return;
+  var feats=window._aw.filter(function(x){return x.featured;});
+  if(feats.length&&!featuredIds[1]&&!featuredIds[2]){
+    if(feats[0]) featuredIds[1]=feats[0].id;
+    if(feats[1]) featuredIds[2]=feats[1].id;
+  }
 }
 function renderFeatSlots(){
   [1,2].forEach(function(n){
-    var slot = document.getElementById('featSlot'+n);
-    var id   = featuredIds[n];
-    var a    = id && window._aw ? window._aw.find(function(x){return x.id===id;}) : null;
-    /* clear old img */
-    var oldImg = slot.querySelector('img.feat-img');
-    if(oldImg) oldImg.remove();
+    var slot=$('featSlot'+n); if(!slot) return;
+    var id=featuredIds[n];
+    var a=id&&window._aw?window._aw.find(function(x){return x.id===id;}):null;
+    var old=slot.querySelector('img.feat-img'); if(old) old.remove();
     slot.classList.remove('filled');
-    document.getElementById('feat'+n+'Title').textContent='';
+    var ft=$('feat'+n+'Title'); if(ft) ft.textContent='';
     if(a){
       var img=document.createElement('img');
-      img.className='feat-img';
-      img.src=rawUrl(a.image);
-      img.alt=a.title;
+      img.className='feat-img'; img.src=rawStable(a.image); img.alt=a.title;
       img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
       slot.insertBefore(img,slot.firstChild);
       slot.classList.add('filled');
-      document.getElementById('feat'+n+'Title').textContent=a.title||'';
+      if(ft) ft.textContent=a.title||'';
     }
   });
 }
-
-window.openPicker = function(slot){
-  pickerSlot = slot;
-  var list = window._aw||[];
-  var grid = document.getElementById('pickerGrid');
-  if(!list.length){grid.innerHTML='<div class="pm-empty">No artworks published yet</div>';}
-  else{
-    grid.innerHTML=list.map(function(a){
-      var meta=[a.type,a.year].filter(Boolean).join(' · ');
-      return'<div class="pm-item" data-id="'+a.id+'">'
-        +'<img src="'+esc(rawUrl(a.image))+'" alt="'+esc(a.title)+'" loading="lazy"/>'
-        +'<div class="pm-item-lbl"><div class="pm-item-t">'+esc(a.title)+'</div>'+(meta?'<div class="pm-item-m">'+esc(meta)+'</div>':'')+'</div>'
-        +'</div>';
-    }).join('');
-    grid.querySelectorAll('.pm-item').forEach(function(item){
-      item.addEventListener('click',function(){
-        featuredIds[pickerSlot]=+item.dataset.id;
-        document.getElementById('pickerModal').classList.remove('open');
-        document.body.style.overflow='';
-        renderFeatSlots();
-      });
-    });
-  }
-  document.getElementById('pickerModal').classList.add('open');
+function openPicker(slot){ return window.openPicker(slot); }
+window.openPicker=function(slot){
+  pickerSlot=slot;
+  var list=window._aw||[];
+  var pm=$('pickerModal'); if(pm) pm.classList.add('open');
   document.body.style.overflow='hidden';
+  var grid=$('pickerGrid'); if(!grid) return;
+  if(!list.length){
+    if(!tok()){grid.innerHTML='<div class="pm-empty">Save your GitHub token first.</div>';return;}
+    grid.innerHTML='<div class="pm-empty">Loading…</div>';
+    loadData().then(function(r){
+      window._aw=r.list; renderList(r.list,activeLcat);
+      window.openPicker(slot);
+      var pm2=$('pickerModal'); if(pm2) pm2.classList.remove('open');
+    }).catch(function(){grid.innerHTML='<div class="pm-empty">Could not load — check token.</div>';});
+    return;
+  }
+  grid.innerHTML=list.map(function(a){
+    var meta=[a.type,a.year].filter(Boolean).join(' · ');
+    return'<div class="pm-item" data-id="'+a.id+'">'
+      +'<img src="'+esc(rawStable(a.image))+'" alt="'+esc(a.title)+'" loading="lazy"/>'
+      +'<div class="pm-item-lbl"><div class="pm-item-t">'+esc(a.title)+'</div>'+(meta?'<div class="pm-item-m">'+esc(meta)+'</div>':'')+'</div>'
+      +'</div>';
+  }).join('');
+  grid.querySelectorAll('.pm-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      featuredIds[pickerSlot]=+item.dataset.id;
+      var pm3=$('pickerModal'); if(pm3) pm3.classList.remove('open');
+      document.body.style.overflow='';
+      renderFeatSlots();
+    });
+  });
 };
-
-document.getElementById('pickerClose').addEventListener('click',function(){
-  document.getElementById('pickerModal').classList.remove('open');
+var _pc=$('pickerClose');
+if(_pc) _pc.addEventListener('click',function(){
+  var pm=$('pickerModal'); if(pm) pm.classList.remove('open');
   document.body.style.overflow='';
 });
-
-/* save featured — pushes featured:true onto those 2 artworks in artworks.json */
-document.getElementById('saveFeatBtn').addEventListener('click', function(){
-  if(!ghToken){showStatus('Save your GitHub token first','err');return;}
-  var id1=featuredIds[1], id2=featuredIds[2];
-  if(!id1||!id2){showStatus('Please choose 2 featured works','err');return;}
+var _sf=$('saveFeatBtn');
+if(_sf) _sf.addEventListener('click',function(){
+  if(!tok()){showStatus('Save token first','err');return;}
+  var id1=featuredIds[1],id2=featuredIds[2];
+  if(!id1&&!id2){showStatus('Choose at least 1 artwork first','err');return;}
   showStatus('Saving featured works…','loading');
-  /* save IDs to localStorage so index can use them */
-  localStorage.setItem('st117_featured', JSON.stringify(featuredIds));
-  /* update artworks.json — mark selected as featured, others as not */
+  localStorage.setItem('st117_featured',JSON.stringify(featuredIds));
   loadData().then(function(result){
-    var list=result.list; var sha=result.sha;
-    list.forEach(function(a){ a.featured=(a.id===id1||a.id===id2); });
-    var content=btoa(unescape(encodeURIComponent(JSON.stringify(list,null,2))));
-    var body={message:'Update featured works',content:content,branch:BRANCH}; if(sha)body.sha=sha;
+    var list=result.list,sha=result.sha;
+    list.forEach(function(a){a.featured=(a.id===id1||a.id===id2);});
+    var j=JSON.stringify(list,null,2);
+    var content;try{content=btoa(unescape(encodeURIComponent(j)));}catch(e){content=btoa(unescape(encodeURIComponent(j.replace(/[\u0080-\uFFFF]/g,'?'))));}
+    var body={message:'Update featured',content:content,branch:BRANCH}; if(sha) body.sha=sha;
     return ghFetch('PUT','artworks.json',body).then(function(){return list;});
   }).then(function(list){
-    window._aw=list; showStatus('✓ Featured works saved! Site updates in ~1 minute.','ok');
-    renderFeatSlots();
+    window._aw=list; showStatus('✓ Featured works saved!','ok'); renderFeatSlots();
   }).catch(function(err){showStatus('✗ '+err.message,'err');});
 });
 
-/* ── ARTISTS ── */
+
+/* ── WORKS SEARCH ── */
+window.filterWorks=function(q){
+  var list=window._aw||[];
+  if(!q.trim()){renderList(list,activeLcat);return;}
+  var ql=q.toLowerCase();
+  var filtered=list.filter(function(a){
+    return (a.title||'').toLowerCase().indexOf(ql)!==-1
+      ||(a.type||'').toLowerCase().indexOf(ql)!==-1
+      ||(a.description||'').toLowerCase().indexOf(ql)!==-1
+      ||(a.year||'').indexOf(ql)!==-1;
+  });
+  window._aw=list; // preserve full list
+  var lc=$('listCount'); if(lc) lc.textContent=filtered.length+' result'+(filtered.length!==1?'s':'');
+  var el=$('awList'); if(!el) return;
+  if(!filtered.length){el.innerHTML='<div class="list-empty"><div class="ei">—</div><p>No artworks match "'+esc(q)+'"</p></div>';return;}
+  // reuse renderList logic but with filtered
+  var saved=window._aw;
+  window._aw=filtered;
+  renderList(filtered,'all');
+  window._aw=saved;
+};
+
+/* wire up search input */
+(function(){
+  var s=document.getElementById('awSearch');
+  if(s) s.addEventListener('input',function(){
+    if(window.filterWorks) window.filterWorks(this.value);
+  });
+})();
+
+/* ═══════════════════════════════════════
+   ARTISTS
+═══════════════════════════════════════ */
 function loadArtistPanel(){
-  var data={}; try{var s=localStorage.getItem('st117_artists');if(s)data=JSON.parse(s);}catch(e){}
-  if(data.a1name)document.getElementById('a1name').value=data.a1name;
-  if(data.a1role)document.getElementById('a1role').value=data.a1role;
-  if(data.a1bio)document.getElementById('a1bio').value=data.a1bio;
-  if(data.a2name)document.getElementById('a2name').value=data.a2name;
-  if(data.a2role)document.getElementById('a2role').value=data.a2role;
-  if(data.a2bio)document.getElementById('a2bio').value=data.a2bio;
+  var data={};
+  try{var s=localStorage.getItem('st117_artists');if(s)data=JSON.parse(s);}catch(e){}
+  ['a1name','a1role','a1bio','a2name','a2role','a2bio'].forEach(function(k){if(data[k])sv(k,data[k]);});
   loadAPhoto('st117_photo1','aImg1','aPrev1');
   loadAPhoto('st117_photo2','aImg2','aPrev2');
 }
 function loadAPhoto(key,imgId,boxId){
   var s=localStorage.getItem(key);
-  if(s){var img=document.getElementById(imgId);if(img){img.src=s;img.style.display='block';}
-    var box=document.getElementById(boxId);if(box){var ph=box.querySelector('.ae-ph-lbl');if(ph)ph.style.display='none';}}
+  if(s){
+    var img=$(imgId); if(img){img.src=s;img.style.display='block';}
+    var box=$(boxId); if(box){var ph=box.querySelector('.ae-ph-lbl');if(ph)ph.style.display='none';}
+  }
 }
-window.saveArtist=function(n){
-  var name=document.getElementById('a'+n+'name').value.trim();
+function saveArtist(n){
+  var name=($(('a'+n+'name'))||{}).value||''; name=name.trim();
   if(!name){showStatus('Enter artist name','err');return;}
   var data={};try{var s=localStorage.getItem('st117_artists');if(s)data=JSON.parse(s);}catch(e){}
   data['a'+n+'name']=name;
-  data['a'+n+'role']=document.getElementById('a'+n+'role').value.trim();
-  data['a'+n+'bio']=document.getElementById('a'+n+'bio').value.trim();
+  data['a'+n+'role']=(($('a'+n+'role'))||{}).value||'';
+  data['a'+n+'bio']=(($('a'+n+'bio'))||{}).value||'';
   localStorage.setItem('st117_artists',JSON.stringify(data));
-  showStatus('✓ Artist '+n+' saved — refresh the main site to see changes','ok');
-};
-document.getElementById('aPhoto1').addEventListener('change',function(){
-  var f=this.files[0];if(!f)return;
-  var r=new FileReader();r.onload=function(e){localStorage.setItem('st117_photo1',e.target.result);loadAPhoto('st117_photo1','aImg1','aPrev1');showStatus('✓ Artist 1 photo saved','ok');};r.readAsDataURL(f);
+  showStatus('✓ Artist '+n+' saved','ok');
+}
+var _sa1=$('saveArtist1Btn'); if(_sa1) _sa1.addEventListener('click',function(){saveArtist(1);});
+var _sa2=$('saveArtist2Btn'); if(_sa2) _sa2.addEventListener('click',function(){saveArtist(2);});
+var _ap1=$('aPhoto1'); if(_ap1) _ap1.addEventListener('change',function(){
+  var f=this.files[0]; if(!f) return;
+  var r=new FileReader(); r.onload=function(e){localStorage.setItem('st117_photo1',e.target.result);loadAPhoto('st117_photo1','aImg1','aPrev1');showStatus('✓ Photo saved','ok');}; r.readAsDataURL(f);
 });
-document.getElementById('aPhoto2').addEventListener('change',function(){
-  var f=this.files[0];if(!f)return;
-  var r=new FileReader();r.onload=function(e){localStorage.setItem('st117_photo2',e.target.result);loadAPhoto('st117_photo2','aImg2','aPrev2');showStatus('✓ Artist 2 photo saved','ok');};r.readAsDataURL(f);
+var _ap2=$('aPhoto2'); if(_ap2) _ap2.addEventListener('change',function(){
+  var f=this.files[0]; if(!f) return;
+  var r=new FileReader(); r.onload=function(e){localStorage.setItem('st117_photo2',e.target.result);loadAPhoto('st117_photo2','aImg2','aPrev2');showStatus('✓ Photo saved','ok');}; r.readAsDataURL(f);
 });
+/* artist photo box click */
+var _ap1box=$('aPrev1'); if(_ap1box) _ap1box.addEventListener('click',function(){var i=$('aPhoto1');if(i)i.click();});
+var _ap2box=$('aPrev2'); if(_ap2box) _ap2box.addEventListener('click',function(){var i=$('aPhoto2');if(i)i.click();});
 
-/* ── INIT ── */
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
 function initApp(){
+  setTimeout(refreshWInd,200);
+  /* always read fresh token */
+  var t=tok();
+  var gti=$('ghTokenInput'); if(gti) gti.value=t;
   updateTokenStatus();
+  if(!t){
+    switchPanel('token');
+    setTimeout(function(){showStatus('Paste your GitHub token below and tap Save.','loading');},150);
+  } else {
+    switchPanel('upload');
+  }
   loadArtistPanel();
   loadData().then(function(result){
     window._aw=result.list;
     renderList(result.list,'all');
-    /* init featured panel data */
-    var saved=localStorage.getItem('st117_featured');
-    if(saved){try{featuredIds=JSON.parse(saved);}catch(e){}}
-  }).catch(function(){
-    document.getElementById('awList').innerHTML='<div class="list-empty"><div class="ei">⚠</div><p>Could not load artworks.<br>Check your GitHub Token.</p></div>';
+    loadFeaturedPanel();
+  }).catch(function(err){
+    console.error('[ST117]',err);
+    var el=$('awList');
+    if(el) el.innerHTML='<div class="list-empty"><div class="ei">⚠</div><p>Could not load artworks.<br>Check token in sidebar, then refresh.</p></div>';
+    loadFeaturedPanel();
   });
 }
 

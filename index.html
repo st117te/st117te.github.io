@@ -2680,21 +2680,33 @@ function loadAW(cb){
     'https://raw.githubusercontent.com/'+OWNER+'/'+REPO+'/main/artworks.json?_='+Date.now()
   ];
   var i=0;
+  var lastErr='';
   function tryNext(){
-    if(i>=urls.length){cb([]);return;}
+    if(i>=urls.length){
+      console.error('[ST117] All 3 artworks.json fetch attempts failed. Last error:',lastErr);
+      cb([],false); /* false = fetch genuinely failed, not just empty */
+      return;
+    }
     var url=urls[i++];
     var xhr=new XMLHttpRequest();
     xhr.open('GET',url);
     xhr.timeout=10000;
     xhr.onload=function(){
       if(xhr.status===200){
-        try{var d=JSON.parse(xhr.responseText);cb(d);return;}
-        catch(e){/* bad JSON, try next */}
+        try{
+          var d=JSON.parse(xhr.responseText);
+          console.log('[ST117] Loaded',Array.isArray(d)?d.length:'?','artworks from',url);
+          cb(d,true);
+          return;
+        }
+        catch(e){lastErr='JSON parse error at '+url+': '+e.message;}
+      } else {
+        lastErr='HTTP '+xhr.status+' at '+url;
       }
       tryNext();
     };
-    xhr.onerror=function(){tryNext();};
-    xhr.ontimeout=function(){tryNext();};
+    xhr.onerror=function(){lastErr='Network error at '+url;tryNext();};
+    xhr.ontimeout=function(){lastErr='Timeout at '+url;tryNext();};
     xhr.send();
   }
   tryNext();
@@ -2954,15 +2966,30 @@ function renderRecent(aw){
   });
 }
 
-function renderAll(aw){
+function renderAll(aw,fetchOk){
   window._aw=aw;
   var sk=document.getElementById('feedSkeleton');if(sk)sk.remove();
+  if(fetchOk===false){
+    showLoadError();
+  }
   renderFeatured(aw);
   renderRecent(aw);
   CATS.forEach(function(cat){
     var list=aw.filter(function(a){return catMatch(a,cat);});
     renderFeed(document.getElementById(cat.pvId),list,cat.id,'all');
   });
+}
+function showLoadError(){
+  if(document.getElementById('loadErrBanner'))return;
+  var b=document.createElement('div');
+  b.id='loadErrBanner';
+  b.style.cssText='position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:9500;'
+    +'background:rgba(200,16,46,.95);color:#fff;padding:.7rem 1.2rem;border-radius:8px;'
+    +'font-family:"DM Sans",sans-serif;font-size:.72rem;font-weight:600;'
+    +'box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:90vw;text-align:center;';
+  b.textContent='Could not load artworks — check your connection and pull down to refresh.';
+  document.body.appendChild(b);
+  setTimeout(function(){if(b.parentNode)b.remove();},8000);
 }
 
 /* ── CATEGORY MODAL ── */
@@ -3570,9 +3597,9 @@ function updateTabCounts(aw){
 }
 
 /* ── INIT ── */
-loadAW(function(aw){renderAll(aw);updateTabCounts(aw);});
+loadAW(function(aw,fetchOk){renderAll(aw,fetchOk);updateTabCounts(aw);});
 
 })();
 </script>
 </body>
-</html> 
+</html>
